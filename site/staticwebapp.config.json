@@ -1,0 +1,14 @@
+{
+  "mimeTypes": { ".ics": "text/calendar; charset=utf-8", ".csv": "text/csv; charset=utf-8" },
+  "routes": [
+    { "route": "/hareline.ics", "headers": { "Cache-Control": "public, max-age=3600" } },
+    { "route": "/data/*", "headers": { "Cache-Control": "no-cache" } },
+    { "route": "/hareline", "redirect": "/", "statusCode": 301 },
+    { "route": "/hareline/", "redirect": "/", "statusCode": 301 },
+    { "route": "/events/*", "redirect": "/", "statusCode": 301 }
+  ],
+  "globalHeaders": {
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "strict-origin-when-cross-origin"
+  }
+}
