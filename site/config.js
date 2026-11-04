@@ -3,6 +3,6 @@
 window.HARELINE_CONFIG = {
   runsCsvUrl: "",
   venuesCsvUrl: "",
-  icsUrl: "https://barnesh3.com/hareline.ics",
+  icsUrl: "",          // filled in by the build from SITE_URL
   defaultStart: "19:30"
 };

@@ -7,13 +7,13 @@ The page reads the sheet directly, so a change shows up within a few minutes of 
 Google Sheet (Runs + Venues tabs)
         │  published as CSV
         ├──► Hareline page (reads it live in the browser; falls back to a saved copy)
-        └──► Nightly build (GitHub Actions) ──► hareline.ics calendar feed + saved copy ──► Azure Static Web Apps
+        └──► Nightly build (GitHub Actions) ──► hareline.ics calendar feed + saved copy ──► GitHub Pages
 ```
 
 There are two ways to use it:
 
 1. **Now:** paste `dist-extra/wordpress-embed.html` into a Custom HTML block on the existing WordPress Hareline page.
-2. **Later:** deploy the whole static site (`dist/`) to Azure Static Web Apps and retire WordPress.
+2. **Later:** publish the whole static site (`dist/`) on GitHub Pages (free) and retire WordPress.
 
 Both read the same sheet, so the organisers' routine doesn't change when you switch.
 
@@ -50,26 +50,28 @@ Past runs drop off the hareline automatically, and the page shows up to 12 recen
 
 WordPress only allows `<script>` in Custom HTML blocks for administrators. If it gets stripped, add the snippet with a code-snippet plugin such as WPCode instead.
 
-## 3. Option B: standalone site on Azure Static Web Apps
+## 3. Option B: standalone site on GitHub Pages
 
-```bash
-# Infrastructure (Free tier)
-az group create -n rg-barnesh3 -l westeurope
-az deployment group create -g rg-barnesh3 -f infra/main.bicep
-az staticwebapp secrets list -n swa-barnesh3 --query properties.apiKey -o tsv
-```
+1. Push this folder to a GitHub repository, for example `barnes-hareline`. A public repo is simplest; Pages on private repos needs a paid plan.
+2. In the repo go to **Settings → Pages** and set **Source** to **GitHub Actions**.
+3. In **Settings → Secrets and variables → Actions → Variables**, add:
+   - `RUNS_CSV_URL` and `VENUES_CSV_URL`: the published sheet links.
+   - `SITE_URL`: where the site will live. Start with `https://<github-user>.github.io/barnes-hareline/`, then change it to `https://barnesh3.com/` once the domain points at Pages.
+4. Put the two CSV links into `site/config.js` too, so the page reads the sheet live.
+5. Push to `main`, or use Actions → **Build and deploy hareline** → Run workflow.
 
-In the GitHub repository:
+The workflow deploys on every push to `main`, nightly, and on demand. The nightly run refreshes `hareline.ics` and the saved copy. Nothing needs secrets: the only inputs are the public sheet links.
 
-- **Secret** `AZURE_STATIC_WEB_APPS_API_TOKEN`: the token from the last command.
-- **Variables** `RUNS_CSV_URL`, `VENUES_CSV_URL`: the published sheet links.
-- **Variable** `SITE_URL`: `https://barnesh3.com/`.
+**Moving the domain:**
 
-Also put the two CSV links into `site/config.js` so the page reads the sheet live.
+1. In Settings → Pages → Custom domain, enter `barnesh3.com` and tick **Enforce HTTPS** once the certificate is issued.
+2. At the domain registrar, add four `A` records on the apex pointing at GitHub's Pages addresses: `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`.
+3. Add a `CNAME` record for `www` pointing at `<github-user>.github.io`.
+4. Set the `SITE_URL` variable to `https://barnesh3.com/` and run the workflow again.
 
-`.github/workflows/deploy.yml` deploys on every push to `main`, nightly, and on demand (Actions → Run workflow). The nightly run refreshes `hareline.ics` and the saved copy.
+Verifying the domain under your GitHub account settings (Settings → Pages → Verified domains) stops anyone else claiming it.
 
-**Moving the domain:** add `barnesh3.com` as a custom domain on the Static Web App. The apex domain needs a TXT validation record plus an ALIAS/ANAME record, or point `www` with a CNAME and redirect the apex at the registrar. `staticwebapp.config.json` already 301-redirects the old `/hareline/` and `/events/...` URLs to the new page.
+**Old WordPress links:** GitHub Pages can't do server-side redirects. The build writes forwarding pages at `/hareline/`, `/events/` and `/about/`. Old run pages such as `/events/run-no-2144/` hit `404.html`, which sends them to the hareline.
 
 ## Build and run locally
 
@@ -88,15 +90,15 @@ Node 22, no npm dependencies.
 | `site/core.js` | Pure logic: CSV parsing, date parsing, venue lookup, iCalendar output. Shared by page, embed and build |
 | `site/app.js` | Renders the hareline into the page |
 | `site/styles.css` | Page styles. Everything after `/* @components` is reused by the WordPress embed |
-| `site/config.js` | Sheet links and calendar URL for the live site |
+| `site/config.js` | Sheet links for the live site (the build fills in the calendar URL) |
 | `site/data/*.csv` | Saved copy of the sheet, used if Google is unreachable |
-| `scripts/build.mjs` | Builds `dist/`, `hareline.ics`, the WordPress embed and a self-contained preview |
-| `infra/main.bicep` | Azure Static Web App (Free) |
-| `.github/workflows/deploy.yml` | Build and deploy, nightly refresh |
+| `scripts/build.mjs` | Builds `dist/` (site, `hareline.ics`, redirect pages, `404.html`), the WordPress embed and a self-contained preview |
+| `.github/workflows/deploy.yml` | Build and deploy to GitHub Pages, nightly refresh |
 
 ## Things to know
 
 - Google can take up to about 5 minutes to republish a sheet after an edit.
+- GitHub Pages caches pages for about 10 minutes, so a fresh deploy can take that long to show.
 - Calendar apps poll subscribed feeds on their own schedule. Google Calendar can take up to a day, Apple and Outlook are usually quicker. The feed itself is rebuilt nightly, or immediately with Run workflow.
 - Times in the feed are written as Europe/London local time, so they stay at 19:30 across the clocks changing.
 - Published sheet links are public. Don't put phone numbers or other personal details for members in the sheet.

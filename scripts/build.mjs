@@ -1,7 +1,7 @@
 // Build the static hareline site into dist/.
 //   RUNS_CSV_URL / VENUES_CSV_URL  published Google Sheet CSV links (optional; falls back to site/data)
 //   SITE_URL                        public base URL, e.g. https://barnesh3.com/
-// Outputs: dist/ (deployable site + hareline.ics), dist-extra/wordpress-embed.html, dist-extra/preview.html
+// Outputs: dist/ (GitHub Pages site + hareline.ics), dist-extra/wordpress-embed.html, dist-extra/preview.html
 import { readFile, writeFile, mkdir, cp, rm } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
@@ -44,12 +44,53 @@ const fonts = `<link rel="preconnect" href="https://fonts.googleapis.com"><link 
 // ---- dist/: the deployable site ----
 await rm(dist, { recursive: true, force: true });
 await mkdir(path.join(dist, "data"), { recursive: true });
-for (const f of ["core.js", "app.js", "styles.css", "config.js", "staticwebapp.config.json", "about.html"]) {
+for (const f of ["core.js", "app.js", "styles.css", "config.js", "about.html"]) {
   try { await cp(path.join(site, f), path.join(dist, f)); } catch { /* optional file */ }
 }
 await writeFile(path.join(dist, "data/runs.csv"), runsCsv);       // saved copy used if the sheet is unreachable
 await writeFile(path.join(dist, "data/venues.csv"), venuesCsv);
 await writeFile(path.join(dist, "hareline.ics"), C.toIcs(runs, { siteUrl: SITE_URL }));
+
+// Point the calendar link at wherever this build is published.
+const cfgPath = path.join(dist, "config.js");
+await writeFile(cfgPath, (await readFile(cfgPath, "utf8")).replace(/icsUrl:\s*"[^"]*"/, `icsUrl: ${JSON.stringify(ICS_URL)}`));
+
+// ---- GitHub Pages extras ----
+// No Jekyll processing; serve files exactly as built.
+await writeFile(path.join(dist, ".nojekyll"), "");
+// GitHub Pages has no server-side redirects, so old WordPress URLs get small forwarding pages.
+const BASE_PATH = new URL(SITE_URL).pathname;          // "/" or "/repo-name/"
+const forward = (to, label) => `<!doctype html>
+<html lang="en-GB"><head><meta charset="utf-8">
+<title>Barnes H3 – moved</title>
+<meta name="robots" content="noindex">
+<link rel="canonical" href="${SITE_URL}${to}">
+<meta http-equiv="refresh" content="0; url=${BASE_PATH}${to}">
+<script>location.replace(${JSON.stringify(BASE_PATH + to)});</script>
+</head><body><p>This page has moved. <a href="${BASE_PATH}${to}">Go to the ${label}</a>.</p></body></html>
+`;
+for (const [from, to, label] of [["hareline", "", "hareline"], ["events", "", "hareline"], ["about", "about.html", "About page"]]) {
+  await mkdir(path.join(dist, from), { recursive: true });
+  await writeFile(path.join(dist, from, "index.html"), forward(to, label));
+}
+// Individual old run pages (/events/run-no-2144/ etc.) can't each have a stub, so 404.html forwards them.
+await writeFile(path.join(dist, "404.html"), `<!doctype html>
+<html lang="en-GB"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Page not found – Barnes H3</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="${BASE_PATH}styles.css">
+<script>
+  var p = location.pathname.slice(${JSON.stringify(BASE_PATH)}.length);
+  if (/^(events|hareline|wp-content|run-no)/i.test(p)) location.replace(${JSON.stringify(BASE_PATH)});
+</script>
+</head><body>
+<main class="wrap" style="padding-block:3rem">
+  <h1 class="mast__title" style="color:var(--green)">Lost the trail?</h1>
+  <p>That page doesn't exist. <a href="${BASE_PATH}">Back to the hareline</a>.</p>
+</main>
+</body></html>
+`);
 await writeFile(path.join(dist, "index.html"), `<!doctype html>
 <html lang="en-GB">
 <head>
