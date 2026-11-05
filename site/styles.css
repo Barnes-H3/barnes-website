@@ -277,7 +277,7 @@ main.page--about { padding-top: 2.5rem; }
   flex: 1 1 16rem; min-width: 0;
   font: 0.85rem/1.4 var(--font-mono);
   background: var(--paper); border: 1px solid var(--line); border-radius: 6px;
-  padding: 0.6rem 0.75rem; overflow-x: auto; white-space: nowrap;
+  padding: 0.6rem 0.75rem; overflow-wrap: anywhere;
 }
 .bh-select { user-select: all; }
 
