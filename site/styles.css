@@ -168,7 +168,7 @@ main.page--about { padding-top: 2.5rem; }
 .bh-next__time { margin-top: 0.6rem; font: 700 1rem/1 var(--font-body); letter-spacing: 0.02em; color: var(--chalk); }
 
 .bh-next__body { padding: 1.5rem 1.6rem 1.6rem; display: grid; gap: 0.55rem; align-content: start; min-width: 0; }
-.bh-next__venue { margin: 0; font: 800 clamp(1.9rem, 5vw, 2.7rem)/1 var(--font-display); text-transform: uppercase; letter-spacing: 0.01em; text-wrap: balance; }
+.bh-next__venue { margin: 0; font: 800 clamp(1.5rem, 4vw, 2rem)/1.1 var(--font-display); text-transform: uppercase; letter-spacing: 0.01em; text-wrap: balance; }
 .bh-next__addr, .bh-next__notes { margin: 0; color: var(--muted); }
 .bh-next__notes { color: var(--ink); }
 .bh-next__hares { display: flex; flex-wrap: wrap; gap: 0.4rem 0.75rem; align-items: baseline; margin-top: 0.35rem; }
@@ -215,11 +215,11 @@ main.page--about { padding-top: 2.5rem; }
 
 /* Home: next two runs side by side, date as a strip across the top of each card */
 .bh-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: 1.25rem; align-items: stretch; }
-.bh-pair .bh-next { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
-.bh-pair .bh-next__date { display: flex; flex-wrap: wrap; justify-content: flex-start; align-items: baseline; gap: 0 0.55rem; padding: 1rem 1.4rem; text-align: left; }
-.bh-pair .bh-next__when { flex-basis: 100%; max-width: max-content; margin-bottom: 0.5rem; }
+.bh-pair .bh-next { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr; }
+.bh-pair .bh-next__date { grid-template-columns: repeat(4, auto); justify-content: start; justify-items: start; align-items: baseline; gap: 0 0.55rem; padding: 1rem 1.4rem; text-align: left; }
+.bh-pair .bh-next__when { grid-column: 1 / -1; margin-bottom: 0.5rem; }
 .bh-pair .bh-next__num { font-size: 3.4rem; }
-.bh-pair .bh-next__time { margin-top: 0; margin-left: 0.4rem; }
+.bh-pair .bh-next__time { grid-column: auto; margin-top: 0; margin-left: 0.4rem; }
 .bh-pair .bh-next__body { padding: 1.25rem 1.4rem 1.4rem; }
 .bh-more { margin: 0; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem 1.5rem; }
 
@@ -286,8 +286,10 @@ main.page--about { padding-top: 2.5rem; }
 
 @media (max-width: 640px) {
   .mast__trail { display: none; }
-  .bh-next { grid-template-columns: 1fr; }
-  .bh-next__date { grid-template-columns: auto auto auto; justify-content: start; align-items: baseline; gap: 0 0.5rem; padding: 1rem 1.25rem; text-align: left; }
+  .bh-next { grid-template-columns: minmax(0, 1fr); }
+  .bh-pair .bh-next__num { font-size: clamp(2.6rem, 13vw, 3.4rem); }
+  .bh-pair .bh-next__time { margin-left: 0; }
+  .bh-next__date { grid-template-columns: auto auto auto; justify-content: start; justify-items: start; align-items: baseline; gap: 0 0.5rem; padding: 1rem 1.25rem; text-align: left; }
   .bh-next__when { grid-column: 1 / -1; justify-self: start; margin-bottom: 0.5rem; }
   .bh-next__num { font-size: 3.2rem; }
   .bh-next__time { grid-column: 1 / -1; margin-top: 0.35rem; }
