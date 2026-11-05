@@ -168,7 +168,7 @@ main.page--about { padding-top: 2.5rem; }
 .bh-next__time { margin-top: 0.6rem; font: 700 1rem/1 var(--font-body); letter-spacing: 0.02em; color: var(--chalk); }
 
 .bh-next__body { padding: 1.5rem 1.6rem 1.6rem; display: grid; gap: 0.55rem; align-content: start; min-width: 0; }
-.bh-next__venue { margin: 0; font: 800 clamp(1.9rem, 5vw, 2.7rem)/1 var(--font-display); text-transform: uppercase; letter-spacing: 0.01em; text-wrap: balance; }
+.bh-next__venue { margin: 0; font: 800 clamp(1.5rem, 4vw, 2rem)/1.1 var(--font-display); text-transform: uppercase; letter-spacing: 0.01em; text-wrap: balance; }
 .bh-next__addr, .bh-next__notes { margin: 0; color: var(--muted); }
 .bh-next__notes { color: var(--ink); }
 .bh-next__hares { display: flex; flex-wrap: wrap; gap: 0.4rem 0.75rem; align-items: baseline; margin-top: 0.35rem; }
