@@ -99,7 +99,7 @@
   }
 
   /*
-   * runRows:   objects from the Runs tab   (run, date, venue, hares, start, notes)
+   * runRows:   objects from the Runs tab   (run, date, venue, hares, start, notes, announcements)
    * venueRows: objects from the Venues tab (venue, address, postcode, website, phone)
    */
   function buildRuns(runRows, venueRows, opts) {
@@ -138,6 +138,8 @@
         hares,
         hareWanted: hares.length === 0,
         notes: r.notes || "",
+        // Free text from the Announcements column; may contain line breaks and links.
+        announcement: (r.announcements || r.announcement || "").replace(/\r\n?/g, "\n").trim(),
         mapUrl: venueTba ? "" : mapUrl(venue, rawVenue)
       });
     });
@@ -204,6 +206,7 @@
       const title = `Barnes H3${r.no ? " run " + r.no : ""}` + (r.venueName ? ` – ${r.venueName}` : " – venue TBA");
       const desc = [
         r.hares.length ? "Hares: " + r.hares.join(" & ") : "Hare wanted!",
+        r.announcement,
         r.notes,
         r.mapUrl ? "Map: " + r.mapUrl : "",
         opts.siteUrl ? "Hareline: " + opts.siteUrl : ""
@@ -226,7 +229,29 @@
     return L.filter(l => l !== null).map(fold).join("\r\n") + "\r\n";
   }
 
+  /*
+   * Rows from the Announcements tab: start, end, announcement (or text), url.
+   * Returns the ones live today in London, newest start first. Blank start = live now; blank end = no end date.
+   * Rows with a date that can't be read are skipped, so a typo hides one notice rather than breaking the page.
+   */
+  function activeNotices(rows, now) {
+    const today = todayKey(now);
+    return (rows || [])
+      .map(r => {
+        const text = (r.announcement || r.announcements || r.text || r.message || "").replace(/\r\n?/g, "\n").trim();
+        const startRaw = (r.start || r.startdate || r.from || "").trim();
+        const endRaw = (r.end || r.enddate || r.until || r.to || "").trim();
+        const start = startRaw ? parseDate(startRaw) : null;
+        const end = endRaw ? parseDate(endRaw) : null;
+        const bad = (startRaw && !start) || (endRaw && !end);
+        return { text, url: (r.url || r.link || "").trim(), start, end, bad };
+      })
+      .filter(n => n.text && !n.bad)
+      .filter(n => (!n.start || n.start.key <= today) && (!n.end || n.end.key >= today))
+      .sort((a, b) => (b.start ? b.start.key : "").localeCompare(a.start ? a.start.key : ""));
+  }
+
   global.HarelineCore = {
-    parseCsv, parseDate, parseTime, todayKey, daysBetween, splitHares, buildRuns, splitByToday, toIcs, mapUrl
+    parseCsv, parseDate, parseTime, todayKey, daysBetween, splitHares, buildRuns, splitByToday, toIcs, mapUrl, activeNotices
   };
 })(typeof globalThis !== "undefined" ? globalThis : window);

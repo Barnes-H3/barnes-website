@@ -1,8 +1,9 @@
 // Edit these two links once the club Google Sheet is published (File → Share → Publish to web → CSV).
 // Leave them empty to use the saved copies in /data.
 window.HARELINE_CONFIG = {
-  runsCsvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQUQovN0bTN2EiG1cDM6gTFb95AMVQYLt5eBLLkmBD0Zj9LLJJPiEWpqMzULwAr7XZ7nzw2BtKX_kvn/pub?gid=0&single=true&output=csv",
-  venuesCsvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQUQovN0bTN2EiG1cDM6gTFb95AMVQYLt5eBLLkmBD0Zj9LLJJPiEWpqMzULwAr7XZ7nzw2BtKX_kvn/pub?gid=762376039&single=true&output=csv",
+  runsCsvUrl: "",
+  venuesCsvUrl: "",
+  announcementsCsvUrl: "",
   icsUrl: "",          // filled in by the build from SITE_URL
   defaultStart: "19:30"
 };

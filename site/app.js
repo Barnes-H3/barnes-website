@@ -7,14 +7,17 @@
   "use strict";
   const C = window.HarelineCore;
   const cfg = Object.assign({
-    mount: "#hareline",
+    mount: "[data-hareline]",  // every matching element is filled; data-hareline="home" or "full"
+    harelineUrl: "hareline/",  // where the home page's "full hareline" link points
     runsCsvUrl: "",            // Google Sheet "Publish to web" CSV link for the Runs tab
     venuesCsvUrl: "",          // ... and for the Venues tab
     fallbackRunsUrl: "data/runs.csv",
     fallbackVenuesUrl: "data/venues.csv",
+    announcementsCsvUrl: "",   // ... and for the Announcements tab (front-page notices)
+    fallbackAnnouncementsUrl: "data/announcements.csv",
     icsUrl: "",                // absolute https URL of hareline.ics; omit to hide the calendar block
     defaultStart: "19:30",
-    inline: null               // { runs: "csv text", venues: "csv text" } for previews
+    inline: null               // { runs, venues, announcements } CSV text, for previews
   }, window.HARELINE_CONFIG || {});
 
   const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -22,6 +25,10 @@
 
   const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const safeUrl = u => /^https?:\/\//i.test(u || "") ? u : "";
+  // Escape, turn web addresses into links and keep the line breaks typed in the sheet.
+  const annText = s => esc(s)
+    .replace(/\bhttps?:\/\/[^\s<]+[^\s<.,;:!?)\]'"]/g, u => `<a href="${u}" target="_blank" rel="noopener">${u.replace(/^https?:\/\/(www\.)?/, "")}</a>`)
+    .replace(/\n/g, "<br>");
   const time = t => `${String(t.h).padStart(2, "0")}:${String(t.min).padStart(2, "0")}`;
 
   async function fetchText(url) {
@@ -35,14 +42,43 @@
     return { runs, venues };
   }
 
-  async function load() {
-    if (cfg.inline) return Object.assign({ source: "sample" }, cfg.inline);
+  // Announcements are optional: a missing tab or failed fetch just means no notices.
+  async function loadAnnouncements(live) {
+    for (const url of [live && cfg.announcementsCsvUrl, cfg.fallbackAnnouncementsUrl]) {
+      if (!url) continue;
+      try { return await fetchText(url); } catch (e) { console.warn("Announcements unavailable from " + url, e); }
+    }
+    return "";
+  }
+
+  async function load(wantAnnouncements) {
+    if (cfg.inline) return Object.assign({ source: "sample", announcements: "" }, cfg.inline);
+    const ann = wantAnnouncements ? loadAnnouncements(true) : Promise.resolve("");
     if (cfg.runsCsvUrl) {
-      try { return Object.assign({ source: "live" }, await loadPair(cfg.runsCsvUrl, cfg.venuesCsvUrl)); }
+      try { return Object.assign({ source: "live" }, await loadPair(cfg.runsCsvUrl, cfg.venuesCsvUrl), { announcements: await ann }); }
       catch (e) { console.warn("Live hareline unavailable, using saved copy.", e); }
     }
     if (!cfg.fallbackRunsUrl) throw new Error("No hareline source configured");
-    return Object.assign({ source: "saved" }, await loadPair(cfg.fallbackRunsUrl, cfg.fallbackVenuesUrl));
+    return Object.assign({ source: "saved" }, await loadPair(cfg.fallbackRunsUrl, cfg.fallbackVenuesUrl), { announcements: await ann });
+  }
+
+  function noticesHtml(notices) {
+    if (!notices.length) return "";
+    const until = n => n.end ? `Until ${DAYS[n.end.weekday]} ${n.end.d} ${MONTHS[n.end.m - 1]}` : "";
+    return `
+      <section class="bh-notices" aria-labelledby="bh-notices-title">
+        <h3 class="bh-notices__title" id="bh-notices-title">Announcements</h3>
+        <ul class="bh-notices__list">
+          ${notices.map(n => `
+            <li class="bh-notice">
+              <p class="bh-notice__text">${annText(n.text)}</p>
+              ${safeUrl(n.url) || until(n) ? `<p class="bh-notice__meta">
+                ${safeUrl(n.url) ? `<a class="bh-notice__link" href="${esc(n.url)}" target="_blank" rel="noopener">More details<span aria-hidden="true"> →</span></a>` : ""}
+                ${until(n) ? `<span class="bh-notice__until">${esc(until(n))}</span>` : ""}
+              </p>` : ""}
+            </li>`).join("")}
+        </ul>
+      </section>`;
   }
 
   function whenLabel(today, run) {
@@ -64,14 +100,15 @@
     return esc(run.venueName);
   }
 
-  function nextRunHtml(run, today) {
+  function nextRunHtml(run, today, eyebrow, idSuffix) {
+    idSuffix = idSuffix || "";
     const v = run.venue;
     const addr = v ? [v.address, v.postcode].filter(Boolean).join(", ") : "";
     const links = [];
     if (run.mapUrl) links.push(`<a class="bh-btn bh-btn--primary" href="${esc(run.mapUrl)}" target="_blank" rel="noopener">Directions</a>`);
     if (v && safeUrl(v.website)) links.push(`<a class="bh-btn" href="${esc(v.website)}" target="_blank" rel="noopener">Pub website</a>`);
     return `
-      <article class="bh-next" aria-labelledby="bh-next-title">
+      <article class="bh-next" aria-labelledby="bh-next-title${idSuffix}">
         <div class="bh-next__date">
           <span class="bh-next__when">${esc(whenLabel(today, run))}</span>
           <span class="bh-next__day">${DAYS[run.date.weekday]}</span>
@@ -80,11 +117,12 @@
           <span class="bh-next__time">${time(run.start)}</span>
         </div>
         <div class="bh-next__body">
-          <p class="bh-eyebrow">Next run${run.no ? ` · No. ${esc(run.no)}` : ""}</p>
-          <h2 class="bh-next__venue" id="bh-next-title">${venueHtml(run)}</h2>
+          <p class="bh-eyebrow">${esc(eyebrow || "Next run")}${run.no ? ` · Run ${esc(run.no)}` : ""}</p>
+          <h2 class="bh-next__venue" id="bh-next-title${idSuffix}">${venueHtml(run)}</h2>
           ${addr ? `<p class="bh-next__addr">${esc(addr)}</p>` : ""}
           ${v && v.phone ? `<p class="bh-next__phone">Pub: <span class="bh-select">${esc(v.phone)}</span></p>` : ""}
           <div class="bh-next__hares"><span class="bh-label">Hares</span><span class="bh-hares">${haresHtml(run)}</span></div>
+          ${run.announcement ? `<div class="bh-ann"><p class="bh-ann__label">Announcement</p><p class="bh-ann__text">${annText(run.announcement)}</p></div>` : ""}
           ${run.notes ? `<p class="bh-next__notes">${esc(run.notes)}</p>` : ""}
           ${links.length ? `<div class="bh-actions">${links.join("")}</div>` : ""}
         </div>
@@ -104,6 +142,7 @@
           <p class="bh-row__meta">${run.no ? `Run ${esc(run.no)} · ` : ""}${DAYS[run.date.weekday]} ${time(run.start)}${today ? ` · ${esc(whenLabel(today, run))}` : ""}</p>
           <p class="bh-row__venue">${run.mapUrl ? `<a href="${esc(run.mapUrl)}" target="_blank" rel="noopener">${venueHtml(run)}</a>` : venueHtml(run)}</p>
           ${addr ? `<p class="bh-row__addr">${esc(addr)}</p>` : ""}
+          ${run.announcement ? `<p class="bh-row__ann"><span class="bh-ann__label">Announcement</span> ${annText(run.announcement)}</p>` : ""}
           ${run.notes ? `<p class="bh-row__notes">${esc(run.notes)}</p>` : ""}
         </div>
         <div class="bh-row__hares">${haresHtml(run)}</div>
@@ -127,30 +166,50 @@
       </section>`;
   }
 
-  function render(el, data) {
-    const runs = C.buildRuns(C.parseCsv(data.runs), C.parseCsv(data.venues), { defaultStart: cfg.defaultStart });
-    const { today, upcoming, past } = C.splitByToday(runs);
-    const [next, ...rest] = upcoming;
-    const note = { live: "Live from the club sheet", saved: "Showing the last saved copy", sample: "Sample data from the current site" }[data.source];
+  function sourceNote(source) {
+    return { live: "Live from the club sheet", saved: "Showing the last saved copy", sample: "Sample runs from the current site, with example announcements" }[source];
+  }
 
+  function renderHome(el, runs, source, notices) {
+    const { today, upcoming } = C.splitByToday(runs);
+    const [first, second] = upcoming;
+    const later = Math.max(upcoming.length - 2, 0);
     el.innerHTML = `
       <div class="bh">
-        ${next ? nextRunHtml(next, today) : `<p class="bh-empty">No runs are listed yet. Check back soon.</p>`}
+        ${first ? `
+          <div class="bh-pair">
+            ${nextRunHtml(first, today, "Next run", "-1")}
+            ${second ? nextRunHtml(second, today, "The week after", "-2") : ""}
+          </div>` : `<p class="bh-empty">No runs are listed yet. Check back soon.</p>`}
+        <p class="bh-more">
+          <a class="bh-btn" href="${esc(cfg.harelineUrl)}">See the full hareline${later ? ` (${later} more run${later === 1 ? "" : "s"})` : ""}</a>
+          <span class="bh-source">${esc(sourceNote(source))}</span>
+        </p>
+        ${noticesHtml(notices || [])}
+      </div>`;
+  }
+
+  function renderFull(el, runs, source) {
+    const { today, upcoming, past } = C.splitByToday(runs);
+    const [next, ...rest] = upcoming;
+    el.innerHTML = `
+      <div class="bh">
+        ${next ? nextRunHtml(next, today, "Next run", "-full") : `<p class="bh-empty">No runs are listed yet. Check back soon.</p>`}
         ${rest.length ? `
           <section class="bh-list" aria-labelledby="bh-list-title">
             <div class="bh-list__head">
-              <h3 class="bh-list__title" id="bh-list-title">Receding hareline</h3>
+              <h3 class="bh-list__title" id="bh-list-title">Coming up</h3>
               <p class="bh-list__count">${rest.length} more run${rest.length === 1 ? "" : "s"} listed</p>
             </div>
             <ol class="bh-rows">${rest.map(r => rowHtml(r, today)).join("")}</ol>
           </section>` : ""}
         ${past.length ? `
           <details class="bh-past">
-            <summary>Recent runs (${past.length})</summary>
+            <summary>Recent runs (${Math.min(past.length, 12)})</summary>
             <ol class="bh-rows">${past.slice(0, 12).map(r => rowHtml(r, null)).join("")}</ol>
           </details>` : ""}
         ${calendarHtml()}
-        <p class="bh-source">${esc(note)}</p>
+        <p class="bh-source">${esc(sourceNote(source))}</p>
       </div>`;
 
     const btn = el.querySelector("#bh-copy");
@@ -167,12 +226,20 @@
   }
 
   async function start() {
-    const el = document.querySelector(cfg.mount);
-    if (!el) return;
-    try { render(el, await load()); }
-    catch (e) {
+    const els = Array.from(document.querySelectorAll(cfg.mount));
+    if (!els.length) return;
+    try {
+      const viewOf = el => (el.getAttribute("data-hareline") || cfg.view || "full").toLowerCase();
+      const data = await load(els.some(el => viewOf(el) === "home"));
+      const runs = C.buildRuns(C.parseCsv(data.runs), C.parseCsv(data.venues), { defaultStart: cfg.defaultStart });
+      const notices = C.activeNotices(C.parseCsv(data.announcements));
+      els.forEach(el => {
+        if (viewOf(el) === "home") renderHome(el, runs, data.source, notices);
+        else renderFull(el, runs, data.source);
+      });
+    } catch (e) {
       console.error(e);
-      el.innerHTML = `<p class="bh-empty">The hareline couldn't be loaded. Refresh the page, or try again in a few minutes.</p>`;
+      els.forEach(el => { el.innerHTML = `<p class="bh-empty">The hareline couldn't be loaded. Refresh the page, or try again in a few minutes.</p>`; });
     }
   }
 
