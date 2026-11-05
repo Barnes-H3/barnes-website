@@ -120,7 +120,6 @@
           <p class="bh-eyebrow">${esc(eyebrow || "Next run")}${run.no ? ` · Run ${esc(run.no)}` : ""}</p>
           <h2 class="bh-next__venue" id="bh-next-title${idSuffix}">${venueHtml(run)}</h2>
           ${addr ? `<p class="bh-next__addr">${esc(addr)}</p>` : ""}
-          ${v && v.phone ? `<p class="bh-next__phone">Pub: <span class="bh-select">${esc(v.phone)}</span></p>` : ""}
           <div class="bh-next__hares"><span class="bh-label">Hares</span><span class="bh-hares">${haresHtml(run)}</span></div>
           ${run.announcement ? `<div class="bh-ann"><p class="bh-ann__label">Announcement</p><p class="bh-ann__text">${annText(run.announcement)}</p></div>` : ""}
           ${run.notes ? `<p class="bh-next__notes">${esc(run.notes)}</p>` : ""}
