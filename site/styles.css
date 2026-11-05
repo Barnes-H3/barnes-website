@@ -16,8 +16,9 @@
   --amber-bg: #fbecd2;
   --focus: #e09a1d;
 
-  --font-display: "Big Shoulders Display", "Arial Narrow", "Roboto Condensed", sans-serif;
-  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, sans-serif;
+  /* Apple devices have Apple SD Gothic Neo; everyone else gets the Gothic A1 web font. */
+  --font-display: "Apple SD Gothic Neo", "Gothic A1", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Apple SD Gothic Neo", "Gothic A1", "Segoe UI", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
 
   --r: 10px;
@@ -70,7 +71,7 @@ a { color: var(--green); }
 .mast__links a:hover, .mast__links a[aria-current="page"] { opacity: 1; text-decoration: underline; text-underline-offset: 4px; }
 .mast__title {
   margin: 2rem 0 0.4rem;
-  font: 800 clamp(3rem, 11vw, 6.2rem)/0.86 var(--font-display);
+  font: 800 clamp(2.2rem, 10vw, 5.6rem)/0.98 var(--font-display);
   text-transform: uppercase;
   letter-spacing: 0.01em;
   text-wrap: balance;
@@ -162,9 +163,9 @@ main.page--about { padding-top: 2.5rem; }
 }
 .bh-next__when { font: 700 0.8rem/1 var(--font-body); letter-spacing: 0.12em; background: var(--chalk); color: var(--band); padding: 0.3rem 0.55rem; border-radius: 999px; margin-bottom: 0.75rem; }
 .bh-next__day { font-weight: 700; font-size: 1.4rem; letter-spacing: 0.1em; line-height: 1; }
-.bh-next__num { font-weight: 800; font-size: 5.2rem; line-height: 0.9; font-variant-numeric: tabular-nums; }
+.bh-next__num { font-weight: 800; font-size: 4.4rem; line-height: 1.05; font-variant-numeric: tabular-nums; }
 .bh-next__mon { font-weight: 700; font-size: 1.6rem; letter-spacing: 0.08em; line-height: 1; }
-.bh-next__time { margin-top: 0.6rem; font: 700 1rem/1 var(--font-mono); letter-spacing: 0.02em; color: var(--chalk); }
+.bh-next__time { margin-top: 0.6rem; font: 700 1rem/1 var(--font-body); letter-spacing: 0.02em; color: var(--chalk); }
 
 .bh-next__body { padding: 1.5rem 1.6rem 1.6rem; display: grid; gap: 0.55rem; align-content: start; min-width: 0; }
 .bh-next__venue { margin: 0; font: 800 clamp(1.9rem, 5vw, 2.7rem)/1 var(--font-display); text-transform: uppercase; letter-spacing: 0.01em; text-wrap: balance; }
