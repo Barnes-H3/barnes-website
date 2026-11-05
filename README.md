@@ -73,9 +73,7 @@ WordPress only allows `<script>` in Custom HTML blocks for administrators. If it
 
 1. Push this folder to a GitHub repository, for example `barnes-hareline`. A public repo is simplest; Pages on private repos needs a paid plan.
 2. In the repo go to **Settings → Pages** and set **Source** to **GitHub Actions**.
-3. In **Settings → Secrets and variables → Actions → Variables**, add:
-   - `RUNS_CSV_URL`, `VENUES_CSV_URL` and `ANNOUNCEMENTS_CSV_URL`: the published sheet links.
-   - `SITE_URL`: where the site will live. Start with `https://<github-user>.github.io/barnes-hareline/`, then change it to `https://barnesh3.com/` once the domain points at Pages.
+3. In **Settings → Secrets and variables → Actions → Variables**, add `RUNS_CSV_URL`, `VENUES_CSV_URL` and `ANNOUNCEMENTS_CSV_URL`: the published sheet links. The site address is picked up from the Pages settings automatically.
 4. Put the three CSV links into `site/config.js` too, so the page reads the sheet live.
 5. Push to `main`, or use Actions → **Build and deploy hareline** → Run workflow.
 
@@ -86,7 +84,7 @@ The workflow deploys on every push to `main`, nightly, and on demand. The nightl
 1. In Settings → Pages → Custom domain, enter `barnesh3.com` and tick **Enforce HTTPS** once the certificate is issued.
 2. At the domain registrar, add four `A` records on the apex pointing at GitHub's Pages addresses: `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`.
 3. Add a `CNAME` record for `www` pointing at `<github-user>.github.io`.
-4. Set the `SITE_URL` variable to `https://barnesh3.com/` and run the workflow again.
+4. Run the workflow again, so the site's links and `hareline.ics` use the new domain.
 
 Verifying the domain under your GitHub account settings (Settings → Pages → Verified domains) stops anyone else claiming it.
 
