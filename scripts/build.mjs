@@ -4,7 +4,6 @@
 //   SITE_URL                        public base URL, e.g. https://barnesh3.com/ or https://user.github.io/repo/
 // Outputs:
 //   dist/                            GitHub Pages site: / (home), /hareline/, /about/, hareline.ics
-//   dist-extra/wordpress-embed.html  hareline as one WordPress Custom HTML block
 //   dist-extra/preview.html          self-contained preview of all three pages (hash routing, sample data)
 import { readFile, writeFile, mkdir, cp, rm } from "node:fs/promises";
 import { existsSync } from "node:fs";
@@ -237,7 +236,6 @@ ${hasRuns ? `<script src="${BASE}config.js"></script>
 
 // ---------- GitHub Pages extras ----------
 await writeFile(path.join(dist, ".nojekyll"), "");    // serve files as built, no Jekyll
-// Old WordPress run pages (/events/run-no-2144/ ...) can't each have a file, so 404.html forwards them.
 await writeFile(path.join(dist, "404.html"), `<!doctype html>
 <html lang="en-GB"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -245,10 +243,6 @@ await writeFile(path.join(dist, "404.html"), `<!doctype html>
 <meta name="robots" content="noindex">
 ${fonts}
 <link rel="stylesheet" href="${BASE}styles.css">
-<script>
-  var p = location.pathname.slice(${JSON.stringify(BASE)}.length);
-  if (/^(events|wp-content|run-no)/i.test(p)) location.replace(${JSON.stringify(BASE + "hareline/")});
-</script>
 </head><body>
 ${mast({ key: "404", heading: "Lost<br>the trail?", sub: "That page doesn't exist. Try the hareline." }, siteLinks, siteLogo)}
 <main class="wrap page"><p><a class="bh-btn bh-btn--primary" href="${BASE}hareline/">Go to the hareline</a></p></main>
@@ -256,40 +250,8 @@ ${footer(siteLinks)}
 </body></html>
 `);
 
-// ---------- WordPress embed: one Custom HTML block, styles scoped to #barnes-hareline ----------
-// Hare requests are embedded as a sanitized snapshot; rebuild this file to refresh it.
-await mkdir(extra, { recursive: true });
-const [tokens, components] = css.split("/* @components");
-const lightTokens = tokens.match(/:root\s*\{([\s\S]*?)\n\}/)[1];
-await writeFile(path.join(extra, "wordpress-embed.html"), `<!-- Barnes H3 hareline: paste into a Custom HTML block.
-     data-hareline="full" shows the whole hareline; change it to "home" for just the next two runs.
-     Update the RUNS/VENUES/ANNOUNCEMENTS links below once the Google Sheet is published as CSV.
-     Announcements only show with data-hareline="home"; leave that link as it is if you don't use them. -->
-<div id="barnes-hareline" data-hareline="full"><p>Loading the hareline…</p></div>
-${fonts}
-<style>
-#barnes-hareline {${lightTokens}
-}
-/* @components${components}
-#barnes-hareline .bh-next, #barnes-hareline .bh-pair { margin-top: 0; }
-</style>
-<script>
-window.HARELINE_CONFIG = {
-  mount: "#barnes-hareline",
-  runsCsvUrl: "PASTE-RUNS-CSV-LINK-HERE",
-  venuesCsvUrl: "PASTE-VENUES-CSV-LINK-HERE",
-  announcementsCsvUrl: "PASTE-ANNOUNCEMENTS-CSV-LINK-HERE",
-  hareRequestsCsv: ${JSON.stringify(hareRequestsCsv)},
-  fallbackRunsUrl: "", fallbackVenuesUrl: "", fallbackAnnouncementsUrl: "",
-  harelineUrl: "/hareline/",
-  icsUrl: ""
-};
-${core}
-${app}
-</script>
-`);
-
 // ---------- preview.html: all three pages in one file, switched by #home / #hareline / #about ----------
+await mkdir(extra, { recursive: true });
 const pvLinks = { home: "#home", hareline: "#hareline", about: "#about" };
 const pvLogo = logoFile ? await imageSrc(logoFile, "preview") : null;
 const pvSections = await Promise.all(PAGES.map(async p =>
@@ -325,4 +287,4 @@ ${app}
 </script>
 `);
 
-console.log(`Built ${runs.length} runs, ${organisers.length} organisers → dist/ (home, hareline, about, hareline.ics), dist-extra/wordpress-embed.html, dist-extra/preview.html`);
+console.log(`Built ${runs.length} runs, ${organisers.length} organisers → dist/ (home, hareline, about, hareline.ics), dist-extra/preview.html`);

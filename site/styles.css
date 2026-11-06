@@ -128,7 +128,6 @@ main.page--about { padding-top: 2.5rem; }
 .foot nav a { color: var(--muted); }
 .foot__motto { font: 700 1rem/1.2 var(--font-display); text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink); }
 
-/* @components — everything below is shared with the WordPress embed */
 .bh { display: grid; gap: 2rem; font-family: var(--font-body); color: var(--ink); }
 .bh * { box-sizing: border-box; }
 
