@@ -163,7 +163,7 @@ await cp(path.join(site, "images"), path.join(dist, "images"), {
 });
 await writeFile(path.join(dist, "data/runs.csv"), runsCsv);       // saved copy, used if the sheet is unreachable
 await writeFile(path.join(dist, "data/venues.csv"), venuesCsv);
-await writeFile(path.join(dist, "data/announcements.csv"), announcementsCsv || "Start,End,Announcement,URL\n");
+await writeFile(path.join(dist, "data/announcements.csv"), announcementsCsv || "Order,Start,End,Announcement,URL\n");
 await writeFile(path.join(dist, "hareline.ics"), C.toIcs(runs, { siteUrl: SITE_URL + "hareline/" }));
 
 // config.js: the editors' sheet links, plus the paths this build knows about

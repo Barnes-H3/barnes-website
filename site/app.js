@@ -26,11 +26,12 @@
   const HARE_SIGNUP_DATE_ENTRY = "entry.1356401552";
 
   const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const textWithLineBreaks = s => esc(s).replace(/\r\n?|\n/g, "<br>");
   const safeUrl = u => /^https?:\/\//i.test(u || "") ? u : "";
   // Escape, turn web addresses into links and keep the line breaks typed in the sheet.
   const annText = s => esc(s)
     .replace(/\bhttps?:\/\/[^\s<]+[^\s<.,;:!?)\]'"]/g, u => `<a href="${u}" target="_blank" rel="noopener">${u.replace(/^https?:\/\/(www\.)?/, "")}</a>`)
-    .replace(/\n/g, "<br>");
+    .replace(/\r\n?|\n/g, "<br>");
   const time = t => `${String(t.h).padStart(2, "0")}:${String(t.min).padStart(2, "0")}`;
 
   async function fetchText(url) {
@@ -132,7 +133,7 @@
           ${addr ? `<p class="bh-next__addr">${esc(addr)}</p>` : ""}
           <div class="bh-next__hares"><span class="bh-label">${run.hares.length > 1 ? "Hares" : "Hare"}</span><span class="bh-hares">${haresHtml(run)}</span></div>
           ${run.announcement ? `<div class="bh-ann"><p class="bh-ann__label">Announcement</p><p class="bh-ann__text">${annText(run.announcement)}</p></div>` : ""}
-          ${run.notes ? `<p class="bh-next__notes">${esc(run.notes)}</p>` : ""}
+          ${run.notes ? `<p class="bh-next__notes">${textWithLineBreaks(run.notes)}</p>` : ""}
           ${links.length ? `<div class="bh-actions">${links.join("")}</div>` : ""}
         </div>
       </article>`;
@@ -152,7 +153,7 @@
           <p class="bh-row__venue">${run.mapUrl ? `<a href="${esc(run.mapUrl)}" target="_blank" rel="noopener">${venueHtml(run)}</a>` : venueHtml(run)}</p>
           ${addr ? `<p class="bh-row__addr">${esc(addr)}</p>` : ""}
           ${run.announcement ? `<p class="bh-row__ann"><span class="bh-ann__label">Announcement</span> ${annText(run.announcement)}</p>` : ""}
-          ${run.notes ? `<p class="bh-row__notes">${esc(run.notes)}</p>` : ""}
+          ${run.notes ? `<p class="bh-row__notes">${textWithLineBreaks(run.notes)}</p>` : ""}
         </div>
         <div class="bh-row__hares">${haresHtml(run)}</div>
       </li>`;

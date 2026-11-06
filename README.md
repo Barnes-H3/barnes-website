@@ -47,12 +47,13 @@ Both read the same sheet, so the organisers' routine doesn't change when you swi
 
    | Column | What to put in it |
    |---|---|
+   | Order | Optional number; lower numbers appear first. Leave blank to show the notice after numbered notices |
    | Start | First day it shows on the home page. Blank shows it straight away |
    | End | Last day it shows. Blank keeps it up until you delete the row or add an end date |
    | Announcement | The text. Ctrl+Enter (Cmd+Enter on a Mac) for a new line; web addresses become links |
    | URL | Optional link, shown as "More details" |
 
-   Notices show newest first. Old rows can stay in the tab; once the End date passes they disappear from the site. A date the site can't read hides that one notice, so if one doesn't appear, check its dates.
+   Notices with an Order value show in ascending order; blank Order values are placed last and sorted by newest Start date first. The Order column can be omitted from existing sheets. Old rows can stay in the tab; once the End date passes they disappear from the site. A date the site can't read hides that one notice, so if one doesn't appear, check its dates.
 
 5. Make Venue a dropdown. Select the Runs → Venue column, then Data → Data validation → Dropdown (from a range) → `Venues!A2:A`.
 6. Pre-fill the Run and Date columns for the year. Type the first two rows, select both, and drag down. The organisers then only fill in Venue and Hares.
