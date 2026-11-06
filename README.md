@@ -1,6 +1,6 @@
 # Barnes H3 website
 
-A three-page static club site whose run list the organisers update from a Google Sheet.
+A three-page static club site whose run list the hareraiser updates from a Google Sheet.
 
 | Page | URL | What's on it | Who changes it, and how often |
 |---|---|---|---|
@@ -38,7 +38,8 @@ The site is built and deployed to GitHub Pages by GitHub Actions.
    | Announcements | News for that run, shown in a highlighted box: AGM, Christmas run, fancy dress, a dinner to book. Press Ctrl+Enter (Cmd+Enter on a Mac) in the cell for a new line; web addresses become links automatically. It's also added to the calendar entry |
 
 4. **Venues** columns: Venue, Address, Postcode, Website, Phone, Notes. Each pub or car park is entered once and reused.
-   **Announcements** columns are for front-page notices that aren't tied to one run, such as subs being due or a dinner to book:
+
+5. **Announcements** columns are for front-page notices that aren't tied to one run, such as subs being due or a dinner to book:
 
    | Column | What to put in it |
    |---|---|
@@ -51,8 +52,8 @@ The site is built and deployed to GitHub Pages by GitHub Actions.
    Notices with an Order value show in ascending order; blank Order values are placed last and sorted by newest Start date first. The Order column can be omitted from existing sheets. Old rows can stay in the tab; once the End date passes they disappear from the site. A date the site can't read hides that one notice, so if one doesn't appear, check its dates.
 
 5. Make Venue a dropdown. Select the Runs → Venue column, then Data → Data validation → Dropdown (from a range) → `Venues!A2:A`.
-6. Pre-fill the Run and Date columns for the year. Type the first two rows, select both, and drag down. The organisers then only fill in Venue and Hares.
-7. Share the sheet with edit access for the run organisers and one committee backup.
+6. Pre-fill the Run and Date columns for the year. Type the first two rows, select both, and drag down. The hareraiser then only fill in Venue and Hares.
+7. Share the sheet with edit access for the hareraiser and committee backup.
 8. Publish the data. Go to File → Share → **Publish to web**, choose the **Runs** tab and **Comma-separated values (.csv)**, then Publish. Copy the link. Repeat for **Venues** and **Announcements**.
 9. Set `hareRequestsCsvUrl` in `site/config.js` to a published Provisional Bookings CSV containing only `Hash Name` and `Run Date`. The hareline checks for updates once a minute. Do not publish contact details in this feed.
 
@@ -77,11 +78,11 @@ The workflow deploys on every push to `main`, nightly, and on demand. The nightl
 
 Verifying the domain under your GitHub account settings (Settings → Pages → Verified domains) stops anyone else claiming it.
 
-## 3. Changing the About page and organisers
+## 3. Changing the About page and mismanagement
 
 These change rarely, so they live in the repository rather than the sheet. Edit them on github.com: open the file, click the pencil, then **Commit changes**. The site rebuilds itself within a couple of minutes.
 
-**Organisers:** `site/content/organisers.csv`
+**Mismanagement:** `site/content/organisers.csv`
 
 | Column | What to put in it |
 |---|---|
@@ -114,7 +115,7 @@ Node 22, no npm dependencies.
 | `site/app.js` | Renders the runs: `data-hareline="home"` for the next two, `"full"` for the hareline |
 | `site/pages/*.html` | The main content of Home, Hareline and About |
 | `site/content/organisers.csv` | Who runs the club, shown on About |
-| `site/images/` | Logo and organiser photos |
+| `site/images/` | Logo and mismanagement photos |
 | `site/styles.css` | Page styles |
 | `site/config.js` | Sheet links for the live site (the build fills in the calendar URL) |
 | `site/data/*.csv` | Saved copy of the sheet, used if Google is unreachable |
