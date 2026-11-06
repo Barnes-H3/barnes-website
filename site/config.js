@@ -1,9 +1,10 @@
 // Edit these links once the club Google Sheet is published (File → Share → Publish to web → CSV).
-// Leave sheet links empty to use the saved copies in /data.
+// Sheet links can be left empty to use saved copies; the build sanitizes form responses to date and hash name.
 window.HARELINE_CONFIG = {
   runsCsvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQUQovN0bTN2EiG1cDM6gTFb95AMVQYLt5eBLLkmBD0Zj9LLJJPiEWpqMzULwAr7XZ7nzw2BtKX_kvn/pub?gid=0&single=true&output=csv",
   venuesCsvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQUQovN0bTN2EiG1cDM6gTFb95AMVQYLt5eBLLkmBD0Zj9LLJJPiEWpqMzULwAr7XZ7nzw2BtKX_kvn/pub?gid=762376039&single=true&output=csv",
   announcementsCsvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQUQovN0bTN2EiG1cDM6gTFb95AMVQYLt5eBLLkmBD0Zj9LLJJPiEWpqMzULwAr7XZ7nzw2BtKX_kvn/pub?gid=733228824&single=true&output=csv",
+  hareRequestsCsvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTT0pz5MmKh-8p8YaEB1XINWl8P0AJqvQx4R09T9w-2o98MT9Kl4EPrzn724ofeP1bd2-mOyj0R7jVx/pub?output=csv",
   haresPackUrl: "https://barnesh3.com/HaresPack.doc",
   standingOrderUrl: "https://barnesh3.com/StandingOrder.docx",
   icsUrl: "",          // filled in by the build from SITE_URL

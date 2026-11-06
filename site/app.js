@@ -15,6 +15,8 @@
     fallbackVenuesUrl: "data/venues.csv",
     announcementsCsvUrl: "",   // ... and for the Announcements tab (front-page notices)
     fallbackAnnouncementsUrl: "data/announcements.csv",
+    hareRequestsCsvUrl: "",    // public CSV of requested run dates and hash names only
+    hareRequestsCsv: "",       // sanitized, inline CSV for standalone embeds
     icsUrl: "",                // absolute https URL of hareline.ics; omit to hide the calendar block
     defaultStart: "19:30",
     inline: null               // { runs, venues, announcements } CSV text, for previews
@@ -52,6 +54,30 @@
       try { return await fetchText(url); } catch (e) { console.warn("Announcements unavailable from " + url, e); }
     }
     return "";
+  }
+
+  async function loadHareRequests() {
+    if (!cfg.hareRequestsCsv && !cfg.hareRequestsCsvUrl) return new Map();
+    try {
+      const csv = cfg.hareRequestsCsv || await fetchText(cfg.hareRequestsCsvUrl);
+      const rows = C.parseCsv(csv);
+      const requests = new Map();
+      rows.forEach(row => {
+        const date = C.parseDate(row.date);
+        if (!date) {
+          if (row.date) console.warn(`Ignoring hare request with invalid date: ${row.date}`);
+          return;
+        }
+        const names = requests.get(date.key) || [];
+        const name = (row.hashname || "").trim();
+        if (name && !names.includes(name)) names.push(name);
+        requests.set(date.key, names);
+      });
+      return requests;
+    } catch (e) {
+      console.warn("Hare requests unavailable", e);
+      return new Map();
+    }
   }
 
   async function load(wantAnnouncements) {
@@ -101,9 +127,17 @@
     return url.toString();
   }
 
+  function hareRequestPendingHtml(run) {
+    if (!run.hareRequests || !run.hareRequests.length) return "";
+    const names = run.hareRequests.map(esc).join(", ");
+    return `<span class="bh-chip bh-chip--pending">Hare request pending${names ? `: ${names}` : ""}</span>`;
+  }
+
   function haresHtml(run) {
-    if (run.hareWanted) return `<a class="bh-chip bh-chip--wanted" href="${esc(hareSignupUrl(run))}" target="_blank" rel="noopener" aria-label="I want to be the Hare for the run on ${DAYS[run.date.weekday]} ${run.date.d} ${MONTHS[run.date.m - 1]} ${run.date.y}">I want to be the Hare!</a>`;
-    return run.hares.map(h => `<span class="bh-hare">${esc(h)}</span>`).join(`<span class="bh-amp" aria-hidden="true">&amp;</span>`);
+    const hares = run.hareWanted
+      ? `<a class="bh-chip bh-chip--wanted" href="${esc(hareSignupUrl(run))}" target="_blank" rel="noopener" aria-label="I want to be the Hare for the run on ${DAYS[run.date.weekday]} ${run.date.d} ${MONTHS[run.date.m - 1]} ${run.date.y}">I want to be the Hare!</a>`
+      : run.hares.map(h => `<span class="bh-hare">${esc(h)}</span>`).join(`<span class="bh-amp" aria-hidden="true">&amp;</span>`);
+    return `${hares}${hareRequestPendingHtml(run)}`;
   }
 
   function venueHtml(run) {
@@ -252,6 +286,8 @@
       const viewOf = el => (el.getAttribute("data-hareline") || cfg.view || "full").toLowerCase();
       const data = await load(els.some(el => viewOf(el) === "home"));
       const runs = C.buildRuns(C.parseCsv(data.runs), C.parseCsv(data.venues), { defaultStart: cfg.defaultStart });
+      const hareRequests = await loadHareRequests();
+      runs.forEach(run => { run.hareRequests = hareRequests.get(run.date.key) || []; });
       const notices = C.activeNotices(C.parseCsv(data.announcements));
       els.forEach(el => {
         if (viewOf(el) === "home") renderHome(el, runs, data.source, notices);

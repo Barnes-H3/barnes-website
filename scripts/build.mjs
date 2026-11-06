@@ -23,10 +23,16 @@ const read = f => readFile(path.join(site, f), "utf8");
 await import(pathToFileURL(path.join(site, "core.js")).href);
 const C = globalThis.HarelineCore;
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const userCfg = await read("config.js");
+const configuredUrl = key => {
+  const match = userCfg.match(new RegExp(`\\b${key}:\\s*("(?:\\\\.|[^"])*")`));
+  return match ? JSON.parse(match[1]) : "";
+};
+const csvField = value => `"${String(value ?? "").replace(/"/g, '""')}"`;
 
 // ---------- data ----------
-async function csv(envVar, file, optional) {
-  const url = process.env[envVar];
+async function csv(envVar, file, optional, configuredCsvUrl = "") {
+  const url = process.env[envVar] || configuredCsvUrl;
   if (url) {
     const res = await fetch(url);
     if (!res.ok) throw new Error(`${envVar}: ${res.status} ${res.statusText}`);
@@ -44,6 +50,22 @@ async function csv(envVar, file, optional) {
 const runsCsv = await csv("RUNS_CSV_URL", "runs.csv");
 const venuesCsv = await csv("VENUES_CSV_URL", "venues.csv");
 const announcementsCsv = await csv("ANNOUNCEMENTS_CSV_URL", "announcements.csv", true);
+const rawHareRequestsCsv = await csv("HARE_REQUESTS_CSV_URL", "hare-requests.csv", true, configuredUrl("hareRequestsCsvUrl"));
+let hareRequestsCsv = "Date,Hash Name\n";
+if (rawHareRequestsCsv) {
+  const bookingRows = C.parseCsv(rawHareRequestsCsv);
+  const headers = Object.keys(bookingRows[0] || {});
+  const dateHeader = headers.find(h => h === "date" || h.startsWith("whendoyouwanttosettherun"));
+  const nameHeader = headers.find(h => h === "hashname");
+  if (!dateHeader || !nameHeader)
+    throw new Error("Hare requests CSV must contain a run date and Hash Name column.");
+  const safeRows = bookingRows.flatMap(row => {
+    const date = C.parseDate(row[dateHeader]);
+    if (!date) return [];
+    return [`${date.key},${csvField(row[nameHeader])}`];
+  });
+  hareRequestsCsv += safeRows.join("\n") + (safeRows.length ? "\n" : "");
+}
 const runs = C.buildRuns(C.parseCsv(runsCsv), C.parseCsv(venuesCsv));
 if (!runs.length) throw new Error("No valid runs found. Is the Date column filled in?");
 
@@ -164,15 +186,19 @@ await cp(path.join(site, "images"), path.join(dist, "images"), {
 await writeFile(path.join(dist, "data/runs.csv"), runsCsv);       // saved copy, used if the sheet is unreachable
 await writeFile(path.join(dist, "data/venues.csv"), venuesCsv);
 await writeFile(path.join(dist, "data/announcements.csv"), announcementsCsv || "Order,Start,End,Announcement,URL\n");
+await writeFile(path.join(dist, "data/hare-requests.csv"), hareRequestsCsv);
 await writeFile(path.join(dist, "hareline.ics"), C.toIcs(runs, { siteUrl: SITE_URL + "hareline/" }));
 
 // config.js: the editors' sheet links, plus the paths this build knows about
-const userCfg = await read("config.js");
-await writeFile(path.join(dist, "config.js"), userCfg.replace(/icsUrl:\s*"[^"]*"/, `icsUrl: ${JSON.stringify(ICS_URL)}`) + `
+const publicCfg = userCfg
+  .replace(/hareRequestsCsvUrl:\s*"[^"]*"/, 'hareRequestsCsvUrl: ""')
+  .replace(/icsUrl:\s*"[^"]*"/, `icsUrl: ${JSON.stringify(ICS_URL)}`);
+await writeFile(path.join(dist, "config.js"), publicCfg + `
 Object.assign(window.HARELINE_CONFIG, {
   fallbackRunsUrl: ${JSON.stringify(BASE + "data/runs.csv")},
   fallbackVenuesUrl: ${JSON.stringify(BASE + "data/venues.csv")},
   fallbackAnnouncementsUrl: ${JSON.stringify(BASE + "data/announcements.csv")},
+  hareRequestsCsvUrl: ${JSON.stringify(BASE + "data/hare-requests.csv")},
   harelineUrl: ${JSON.stringify(BASE + "hareline/")}
 });
 `);
@@ -231,6 +257,7 @@ ${footer(siteLinks)}
 `);
 
 // ---------- WordPress embed: one Custom HTML block, styles scoped to #barnes-hareline ----------
+// Hare requests are embedded as a sanitized snapshot; rebuild this file to refresh it.
 await mkdir(extra, { recursive: true });
 const [tokens, components] = css.split("/* @components");
 const lightTokens = tokens.match(/:root\s*\{([\s\S]*?)\n\}/)[1];
@@ -252,6 +279,7 @@ window.HARELINE_CONFIG = {
   runsCsvUrl: "PASTE-RUNS-CSV-LINK-HERE",
   venuesCsvUrl: "PASTE-VENUES-CSV-LINK-HERE",
   announcementsCsvUrl: "PASTE-ANNOUNCEMENTS-CSV-LINK-HERE",
+  hareRequestsCsv: ${JSON.stringify(hareRequestsCsv)},
   fallbackRunsUrl: "", fallbackVenuesUrl: "", fallbackAnnouncementsUrl: "",
   harelineUrl: "/hareline/",
   icsUrl: ""
@@ -278,6 +306,7 @@ ${footer(pvLinks)}
 window.HARELINE_CONFIG = {
   icsUrl: ${JSON.stringify(ICS_URL)},
   harelineUrl: "#hareline",
+  hareRequestsCsv: ${JSON.stringify(hareRequestsCsv)},
   inline: { runs: ${JSON.stringify(runsCsv)}, venues: ${JSON.stringify(venuesCsv)}, announcements: ${JSON.stringify(announcementsCsv)} }
 };
 (function () {

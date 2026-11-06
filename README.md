@@ -59,12 +59,13 @@ Both read the same sheet, so the organisers' routine doesn't change when you swi
 6. Pre-fill the Run and Date columns for the year. Type the first two rows, select both, and drag down. The organisers then only fill in Venue and Hares.
 7. Share the sheet with edit access for the run organisers and one committee backup.
 8. Publish the data. Go to File → Share → **Publish to web**, choose the **Runs** tab and **Comma-separated values (.csv)**, then Publish. Copy the link. Repeat for **Venues** and **Announcements**.
+9. Set `hareRequestsCsvUrl` in `site/config.js` to the published Provisional Bookings CSV. It can contain the form responses; the build extracts only the requested date and hash name for the public site. Never use the raw responses URL directly in browser config or publish contact details as part of the site feed.
 
 Past runs drop off the hareline automatically, and the page shows up to 12 recent runs under a fold. Don't delete old rows; they're the club's run history.
 
 ## 2. Option A: drop into the current WordPress site
 
-1. Open `dist-extra/wordpress-embed.html` and replace `PASTE-RUNS-CSV-LINK-HERE` `PASTE-VENUES-CSV-LINK-HERE` and `PASTE-ANNOUNCEMENTS-CSV-LINK-HERE` with the published links. Announcements only appear in the home view (`data-hareline="home"`).
+1. Open `dist-extra/wordpress-embed.html` and replace `PASTE-RUNS-CSV-LINK-HERE` `PASTE-VENUES-CSV-LINK-HERE` and `PASTE-ANNOUNCEMENTS-CSV-LINK-HERE` with the published links. Announcements only appear in the home view (`data-hareline="home"`). Provisional bookings are embedded as a sanitized snapshot; rebuild and replace the block to refresh them.
 2. Edit the Hareline page, remove the event-list block, and add a **Custom HTML** block with the file's contents.
 3. Stop creating event posts. The organisers now edit the sheet only.
 
@@ -75,7 +76,7 @@ WordPress only allows `<script>` in Custom HTML blocks for administrators. If it
 1. Push this folder to a GitHub repository, for example `barnes-hareline`. A public repo is simplest; Pages on private repos needs a paid plan.
 2. In the repo go to **Settings → Pages** and set **Source** to **GitHub Actions**.
 3. In **Settings → Secrets and variables → Actions → Variables**, add `RUNS_CSV_URL`, `VENUES_CSV_URL` and `ANNOUNCEMENTS_CSV_URL`: the published sheet links. The site address is picked up from the Pages settings automatically.
-4. Put the three CSV links into `site/config.js` too, so the page reads the sheet live.
+4. Put the three CSV links and the Provisional Bookings CSV link (`hareRequestsCsvUrl`) into `site/config.js`. The build refreshes and sanitizes provisional bookings when it runs.
 5. Push to `main`, or use Actions → **Build and deploy hareline** → Run workflow.
 
 The workflow deploys on every push to `main`, nightly, and on demand. The nightly run refreshes `hareline.ics` and the saved copy. Nothing needs secrets: the only inputs are the public sheet links.
