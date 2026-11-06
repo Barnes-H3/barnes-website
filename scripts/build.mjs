@@ -49,15 +49,18 @@ async function csv(envVar, file, optional, configuredCsvUrl = "") {
 const runsCsv = await csv("RUNS_CSV_URL", "runs.csv");
 const venuesCsv = await csv("VENUES_CSV_URL", "venues.csv");
 const announcementsCsv = await csv("ANNOUNCEMENTS_CSV_URL", "announcements.csv", true);
+const configuredHareRequestsUrl = process.env.HARE_REQUESTS_CSV_URL || configuredUrl("hareRequestsCsvUrl");
 const rawHareRequestsCsv = await csv("HARE_REQUESTS_CSV_URL", "hare-requests.csv", true, configuredUrl("hareRequestsCsvUrl"));
 let hareRequestsCsv = "Date,Hash Name\n";
+let liveHareRequestsUrl = "";
 if (rawHareRequestsCsv) {
-  const bookingRows = C.parseCsv(rawHareRequestsCsv);
+  const bookingRows = C.parseCsv(rawHareRequestsCsv + "\n__validation__,__validation__");
   const headers = Object.keys(bookingRows[0] || {});
   const dateHeader = headers.find(h => h === "date" || h === "rundate" || h.startsWith("whendoyouwanttosettherun"));
   const nameHeader = headers.find(h => h === "hashname");
   if (!dateHeader || !nameHeader)
     throw new Error("Hare requests CSV must contain a run date and Hash Name column.");
+  if (headers.length === 2) liveHareRequestsUrl = configuredHareRequestsUrl;
   const safeRows = bookingRows.flatMap(row => {
     const date = C.parseDate(row[dateHeader]);
     if (!date) return [];
@@ -197,7 +200,8 @@ Object.assign(window.HARELINE_CONFIG, {
   fallbackRunsUrl: ${JSON.stringify(BASE + "data/runs.csv")},
   fallbackVenuesUrl: ${JSON.stringify(BASE + "data/venues.csv")},
   fallbackAnnouncementsUrl: ${JSON.stringify(BASE + "data/announcements.csv")},
-  hareRequestsCsvUrl: ${JSON.stringify(BASE + "data/hare-requests.csv")},
+  hareRequestsCsv: ${JSON.stringify(hareRequestsCsv)},
+  hareRequestsCsvUrl: ${JSON.stringify(liveHareRequestsUrl || BASE + "data/hare-requests.csv")},
   harelineUrl: ${JSON.stringify(BASE + "hareline/")}
 });
 `);

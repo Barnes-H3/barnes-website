@@ -54,7 +54,7 @@ The site is built and deployed to GitHub Pages by GitHub Actions.
 6. Pre-fill the Run and Date columns for the year. Type the first two rows, select both, and drag down. The organisers then only fill in Venue and Hares.
 7. Share the sheet with edit access for the run organisers and one committee backup.
 8. Publish the data. Go to File → Share → **Publish to web**, choose the **Runs** tab and **Comma-separated values (.csv)**, then Publish. Copy the link. Repeat for **Venues** and **Announcements**.
-9. Set `hareRequestsCsvUrl` in `site/config.js` to the published Provisional Bookings CSV. It can contain the form responses; the build extracts only the requested date and hash name for the public site. Never use the raw responses URL directly in browser config or publish contact details as part of the site feed.
+9. Set `hareRequestsCsvUrl` in `site/config.js` to a published Provisional Bookings CSV containing only `Hash Name` and `Run Date`. The hareline checks for updates once a minute. Do not publish contact details in this feed.
 
 Past runs drop off the hareline automatically, and the page shows up to 12 recent runs under a fold. Don't delete old rows; they're the club's run history.
 

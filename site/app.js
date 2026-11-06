@@ -21,6 +21,7 @@
     defaultStart: "19:30",
     inline: null               // { runs, venues, announcements } CSV text, for previews
   }, window.HARELINE_CONFIG || {});
+  const HARE_REQUESTS_REFRESH_MS = 60 * 1000;
 
   const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -56,27 +57,57 @@
     return "";
   }
 
-  async function loadHareRequests() {
-    if (!cfg.hareRequestsCsv && !cfg.hareRequestsCsvUrl) return new Map();
+  async function loadHareRequests(live = false) {
+    if (!live && cfg.hareRequestsCsv) return parseHareRequests(cfg.hareRequestsCsv, false);
+    if (!cfg.hareRequestsCsvUrl) return new Map();
     try {
-      const csv = cfg.hareRequestsCsv || await fetchText(cfg.hareRequestsCsvUrl);
-      const rows = C.parseCsv(csv);
-      const requests = new Map();
-      rows.forEach(row => {
-        const date = C.parseDate(row.date);
-        if (!date) {
-          if (row.date) console.warn(`Ignoring hare request with invalid date: ${row.date}`);
-          return;
-        }
-        const names = requests.get(date.key) || [];
-        const name = (row.hashname || "").trim();
-        if (name && !names.includes(name)) names.push(name);
-        requests.set(date.key, names);
-      });
-      return requests;
+      return parseHareRequests(await fetchText(cfg.hareRequestsCsvUrl), true);
     } catch (e) {
       console.warn("Hare requests unavailable", e);
-      return new Map();
+      return null;
+    }
+  }
+
+  function parseHareRequests(csv, live) {
+    const rows = C.parseCsv(csv.replace(/(?:\r\n|\r|\n)+$/, "") + "\n__validation__,__validation__");
+    const headers = Object.keys(rows[0] || {});
+    const dateHeader = headers.find(h => h === "date" || h === "rundate" || h.startsWith("whendoyouwanttosettherun"));
+    const nameHeader = headers.find(h => h === "hashname");
+    if (!dateHeader || !nameHeader || (live && headers.length !== 2))
+      throw new Error("Hare requests feed must expose only the run date and hash name.");
+    const requests = new Map();
+    rows.forEach(row => {
+      const rawDate = row[dateHeader];
+      if (rawDate === "__validation__") return;
+      const date = C.parseDate(rawDate);
+      if (!date) {
+        if (rawDate) console.warn(`Ignoring hare request with invalid date: ${rawDate}`);
+        return;
+      }
+      const names = requests.get(date.key) || [];
+      const name = (row[nameHeader] || "").trim();
+      if (name && !names.includes(name)) names.push(name);
+      requests.set(date.key, names);
+    });
+    return requests;
+  }
+
+  async function refreshHareRequests(runs, els) {
+    if (!cfg.hareRequestsCsvUrl) return;
+    try {
+      const requests = await loadHareRequests(true);
+      if (!requests) return;
+      runs.forEach(run => {
+        run.hareRequests = requests.get(run.date.key) || [];
+        els.forEach(el => {
+          el.querySelectorAll("[data-hare-date]").forEach(node => {
+            if (node.getAttribute("data-hare-date") === run.date.key)
+              node.innerHTML = haresHtml(run);
+          });
+        });
+      });
+    } catch (e) {
+      console.warn("Hare request refresh failed", e);
     }
   }
 
@@ -165,7 +196,7 @@
           <p class="bh-eyebrow">${esc(eyebrow || "Next run")}${run.no ? ` · Run ${esc(run.no)}` : ""}</p>
           <h2 class="bh-next__venue" id="bh-next-title${idSuffix}">${venueHtml(run)}</h2>
           ${addr ? `<p class="bh-next__addr">${esc(addr)}</p>` : ""}
-          <div class="bh-next__hares"><span class="bh-label">${run.hares.length > 1 ? "Hares" : "Hare"}</span><span class="bh-hares">${haresHtml(run)}</span></div>
+          <div class="bh-next__hares"><span class="bh-label">${run.hares.length > 1 ? "Hares" : "Hare"}</span><span class="bh-hares" data-hare-date="${run.date.key}">${haresHtml(run)}</span></div>
           ${run.announcement ? `<div class="bh-ann"><p class="bh-ann__label">Announcement</p><p class="bh-ann__text">${annText(run.announcement)}</p></div>` : ""}
           ${run.notes ? `<p class="bh-next__notes">${textWithLineBreaks(run.notes)}</p>` : ""}
           ${links.length ? `<div class="bh-actions">${links.join("")}</div>` : ""}
@@ -189,7 +220,7 @@
           ${run.announcement ? `<p class="bh-row__ann"><span class="bh-ann__label">Announcement</span> ${annText(run.announcement)}</p>` : ""}
           ${run.notes ? `<p class="bh-row__notes">${textWithLineBreaks(run.notes)}</p>` : ""}
         </div>
-        <div class="bh-row__hares">${haresHtml(run)}</div>
+        <div class="bh-row__hares" data-hare-date="${run.date.key}">${haresHtml(run)}</div>
       </li>`;
   }
 
@@ -287,12 +318,20 @@
       const data = await load(els.some(el => viewOf(el) === "home"));
       const runs = C.buildRuns(C.parseCsv(data.runs), C.parseCsv(data.venues), { defaultStart: cfg.defaultStart });
       const hareRequests = await loadHareRequests();
-      runs.forEach(run => { run.hareRequests = hareRequests.get(run.date.key) || []; });
+      runs.forEach(run => { run.hareRequests = hareRequests && hareRequests.get(run.date.key) || []; });
       const notices = C.activeNotices(C.parseCsv(data.announcements));
       els.forEach(el => {
         if (viewOf(el) === "home") renderHome(el, runs, data.source, notices);
         else renderFull(el, runs, data.source);
       });
+      if (cfg.hareRequestsCsvUrl) {
+        const refresh = () => {
+          if (document.visibilityState === "hidden") return;
+          return refreshHareRequests(runs, els);
+        };
+        refresh();
+        window.setInterval(refresh, HARE_REQUESTS_REFRESH_MS);
+      }
     } catch (e) {
       console.error(e);
       els.forEach(el => { el.innerHTML = `<p class="bh-empty">The hareline couldn't be loaded. Refresh the page, or try again in a few minutes.</p>`; });
