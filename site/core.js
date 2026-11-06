@@ -1,6 +1,6 @@
 /*
  * Barnes H3 hareline core.
- * Pure functions shared by the browser page, the WordPress embed and the build script:
+ * Pure functions shared by the browser page and the build script:
  * CSV parsing, run/venue merging and iCalendar generation. No DOM access here.
  */
 (function (global) {

@@ -1,6 +1,6 @@
 # Barnes H3 website
 
-A three-page club site whose run list the organisers update from a Google Sheet. No WordPress posts, no event plugin.
+A three-page static club site whose run list the organisers update from a Google Sheet.
 
 | Page | URL | What's on it | Who changes it, and how often |
 |---|---|---|---|
@@ -17,12 +17,7 @@ Google Sheet (Runs + Venues + Announcements tabs)
         └──► Nightly build (GitHub Actions) ──► hareline.ics calendar feed + saved copy ──► GitHub Pages
 ```
 
-There are two ways to use it:
-
-1. **Now:** paste `dist-extra/wordpress-embed.html` into a Custom HTML block on the existing WordPress Hareline page (and, with `data-hareline="home"`, on the home page).
-2. **Later:** publish the whole static site (`dist/`) on GitHub Pages (free) and retire WordPress.
-
-Both read the same sheet, so the organisers' routine doesn't change when you switch.
+The site is built and deployed to GitHub Pages by GitHub Actions.
 
 ---
 
@@ -63,15 +58,7 @@ Both read the same sheet, so the organisers' routine doesn't change when you swi
 
 Past runs drop off the hareline automatically, and the page shows up to 12 recent runs under a fold. Don't delete old rows; they're the club's run history.
 
-## 2. Option A: drop into the current WordPress site
-
-1. Open `dist-extra/wordpress-embed.html` and replace `PASTE-RUNS-CSV-LINK-HERE` `PASTE-VENUES-CSV-LINK-HERE` and `PASTE-ANNOUNCEMENTS-CSV-LINK-HERE` with the published links. Announcements only appear in the home view (`data-hareline="home"`). Provisional bookings are embedded as a sanitized snapshot; rebuild and replace the block to refresh them.
-2. Edit the Hareline page, remove the event-list block, and add a **Custom HTML** block with the file's contents.
-3. Stop creating event posts. The organisers now edit the sheet only.
-
-WordPress only allows `<script>` in Custom HTML blocks for administrators. If it gets stripped, add the snippet with a code-snippet plugin such as WPCode instead.
-
-## 3. Option B: standalone site on GitHub Pages
+## 2. Deploying the site on GitHub Pages
 
 1. Push this folder to a GitHub repository, for example `barnes-hareline`. A public repo is simplest; Pages on private repos needs a paid plan.
 2. In the repo go to **Settings → Pages** and set **Source** to **GitHub Actions**.
@@ -90,9 +77,7 @@ The workflow deploys on every push to `main`, nightly, and on demand. The nightl
 
 Verifying the domain under your GitHub account settings (Settings → Pages → Verified domains) stops anyone else claiming it.
 
-**Old WordPress links:** `/hareline/` and `/about/` keep the same addresses as on WordPress. GitHub Pages can't do server-side redirects, so old run pages such as `/events/run-no-2144/` hit `404.html`, which sends them to the hareline.
-
-## 4. Changing the About page and organisers
+## 3. Changing the About page and organisers
 
 These change rarely, so they live in the repository rather than the sheet. Edit them on github.com: open the file, click the pencil, then **Commit changes**. The site rebuilds itself within a couple of minutes.
 
@@ -125,15 +110,15 @@ Node 22, no npm dependencies.
 
 | Path | Purpose |
 |---|---|
-| `site/core.js` | Pure logic: CSV parsing, date parsing, venue lookup, iCalendar output. Shared by page, embed and build |
+| `site/core.js` | Pure logic: CSV parsing, date parsing, venue lookup, iCalendar output. Shared by page and build |
 | `site/app.js` | Renders the runs: `data-hareline="home"` for the next two, `"full"` for the hareline |
 | `site/pages/*.html` | The main content of Home, Hareline and About |
 | `site/content/organisers.csv` | Who runs the club, shown on About |
 | `site/images/` | Logo and organiser photos |
-| `site/styles.css` | Page styles. Everything after `/* @components` is reused by the WordPress embed |
+| `site/styles.css` | Page styles |
 | `site/config.js` | Sheet links for the live site (the build fills in the calendar URL) |
 | `site/data/*.csv` | Saved copy of the sheet, used if Google is unreachable |
-| `scripts/build.mjs` | Wraps each page in the shared header and footer and builds `dist/` (pages, `hareline.ics`, `404.html`), the WordPress embed and a self-contained preview |
+| `scripts/build.mjs` | Wraps each page in the shared header and footer and builds `dist/` (pages and `hareline.ics`) plus a self-contained preview |
 | `.github/workflows/deploy.yml` | Build and deploy to GitHub Pages, nightly refresh |
 
 ## Things to know

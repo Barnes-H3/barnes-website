@@ -128,7 +128,7 @@
   }
 
   function hareRequestPendingHtml(run) {
-    if (!run.hareRequests || !run.hareRequests.length) return "";
+    if (!run.hareWanted || !run.hareRequests || !run.hareRequests.length) return "";
     const names = run.hareRequests.map(esc).join(", ");
     return `<span class="bh-chip bh-chip--pending">Hare request pending${names ? `: ${names}` : ""}</span>`;
   }
