@@ -22,6 +22,8 @@
 
   const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const HARE_SIGNUP_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLScYPS5Kng1Ed1WJfY4t_RS7EJGBrFwSgi-_TzkdEkRZ7toSFg/viewform?usp=preview";
+  const HARE_SIGNUP_DATE_ENTRY = "entry.1356401552";
 
   const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const safeUrl = u => /^https?:\/\//i.test(u || "") ? u : "";
@@ -90,8 +92,16 @@
     return `In ${Math.round(days / 7)} weeks`;
   }
 
+  function hareSignupUrl(run) {
+    const url = new URL(HARE_SIGNUP_FORM_URL);
+    url.searchParams.set(`${HARE_SIGNUP_DATE_ENTRY}_day`, String(run.date.d));
+    url.searchParams.set(`${HARE_SIGNUP_DATE_ENTRY}_month`, String(run.date.m));
+    url.searchParams.set(`${HARE_SIGNUP_DATE_ENTRY}_year`, String(run.date.y));
+    return url.toString();
+  }
+
   function haresHtml(run) {
-    if (run.hareWanted) return `<span class="bh-chip bh-chip--wanted">Hare wanted</span>`;
+    if (run.hareWanted) return `<a class="bh-chip bh-chip--wanted" href="${esc(hareSignupUrl(run))}" target="_blank" rel="noopener" aria-label="I want to be the Hare for the run on ${DAYS[run.date.weekday]} ${run.date.d} ${MONTHS[run.date.m - 1]} ${run.date.y}">I want to be the Hare!</a>`;
     return run.hares.map(h => `<span class="bh-hare">${esc(h)}</span>`).join(`<span class="bh-amp" aria-hidden="true">&amp;</span>`);
   }
 

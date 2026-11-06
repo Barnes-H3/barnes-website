@@ -8,7 +8,7 @@
 //   dist-extra/preview.html          self-contained preview of all three pages (hash routing, sample data)
 import { readFile, writeFile, mkdir, cp, rm } from "node:fs/promises";
 import { existsSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import path from "node:path";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -20,7 +20,7 @@ const BASE = new URL(SITE_URL).pathname;               // "/" or "/repo-name/"
 const ICS_URL = SITE_URL + "hareline.ics";
 
 const read = f => readFile(path.join(site, f), "utf8");
-await import(path.join(site, "core.js"));
+await import(pathToFileURL(path.join(site, "core.js")).href);
 const C = globalThis.HarelineCore;
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 

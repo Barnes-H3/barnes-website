@@ -71,12 +71,12 @@ a { color: var(--green); }
 .mast__links a:hover, .mast__links a[aria-current="page"] { opacity: 1; text-decoration: underline; text-underline-offset: 4px; }
 .mast__title {
   margin: 2rem 0 0.4rem;
-  font: 800 clamp(2.2rem, 10vw, 5.6rem)/0.98 var(--font-display);
+  font: 800 clamp(1.76rem, 8vw, 4.48rem)/0.98 var(--font-display);
   text-transform: uppercase;
   letter-spacing: 0.01em;
   text-wrap: balance;
 }
-.mast--home .mast__title { font-size: clamp(2.6rem, 9vw, 5.4rem); }
+.mast--home .mast__title { font-size: clamp(2.08rem, 7.2vw, 4.32rem); }
 .mast__sub { margin: 0; font-size: 1.05rem; color: var(--chalk); max-width: 40rem; }
 .mast__sub strong { color: var(--green-ink); }
 /* Hash trail marks: a chalk "on" arrow running across the band */
@@ -199,7 +199,8 @@ main.page--about { padding-top: 2.5rem; }
 .bh-row__ann .bh-ann__label { margin-right: 0.35rem; }
 
 .bh-chip { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 999px; font: 700 0.8rem/1.2 var(--font-body); letter-spacing: 0.04em; }
-.bh-chip--wanted { background: var(--amber-bg); color: var(--amber); border: 1px dashed currentColor; }
+.bh-chip--wanted { background: var(--amber-bg); color: var(--amber); border: 1px dashed currentColor; text-decoration: none; }
+.bh-chip--wanted:hover { text-decoration: underline; }
 
 .bh-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.6rem; }
 .bh-btn {
