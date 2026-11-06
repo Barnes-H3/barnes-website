@@ -230,8 +230,9 @@
   }
 
   /*
-   * Rows from the Announcements tab: start, end, announcement (or text), url.
-   * Returns the ones live today in London, newest start first. Blank start = live now; blank end = no end date.
+   * Rows from the Announcements tab: start, end, announcement (or text), url, order.
+   * Returns notices live today in London, ordered by explicit order then newest start.
+   * Blank start = live now; blank end = no end date.
    * Rows with a date that can't be read are skipped, so a typo hides one notice rather than breaking the page.
    */
   function activeNotices(rows, now) {
@@ -241,14 +242,20 @@
         const text = (r.announcement || r.announcements || r.text || r.message || "").replace(/\r\n?/g, "\n").trim();
         const startRaw = (r.start || r.startdate || r.from || "").trim();
         const endRaw = (r.end || r.enddate || r.until || r.to || "").trim();
+        const orderRaw = (r.order || "").trim();
+        const parsedOrder = orderRaw ? Number(orderRaw) : null;
         const start = startRaw ? parseDate(startRaw) : null;
         const end = endRaw ? parseDate(endRaw) : null;
         const bad = (startRaw && !start) || (endRaw && !end);
-        return { text, url: (r.url || r.link || "").trim(), start, end, bad };
+        return { text, url: (r.url || r.link || "").trim(), start, end, order: Number.isFinite(parsedOrder) ? parsedOrder : null, bad };
       })
       .filter(n => n.text && !n.bad)
       .filter(n => (!n.start || n.start.key <= today) && (!n.end || n.end.key >= today))
-      .sort((a, b) => (b.start ? b.start.key : "").localeCompare(a.start ? a.start.key : ""));
+      .sort((a, b) => {
+        if (a.order !== null && b.order !== null && a.order !== b.order) return a.order - b.order;
+        if (a.order !== b.order) return a.order === null ? 1 : -1;
+        return (b.start ? b.start.key : "").localeCompare(a.start ? a.start.key : "");
+      });
   }
 
   global.HarelineCore = {
