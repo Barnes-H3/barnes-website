@@ -235,6 +235,16 @@
   }
 
   async function start() {
+    document.querySelectorAll("[data-hareline-config-href]").forEach(el => {
+      const key = el.getAttribute("data-hareline-config-href");
+      const url = cfg[key];
+      if (safeUrl(url)) el.setAttribute("href", url);
+      else {
+        console.error(`Missing or invalid HARELINE_CONFIG.${key}`);
+        el.removeAttribute("href");
+      }
+    });
+
     const els = Array.from(document.querySelectorAll(cfg.mount));
     if (!els.length) return;
     try {
