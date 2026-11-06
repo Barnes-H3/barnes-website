@@ -199,7 +199,8 @@ main.page--about { padding-top: 2.5rem; }
 .bh-row__ann .bh-ann__label { margin-right: 0.35rem; }
 
 .bh-chip { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 999px; font: 700 0.8rem/1.2 var(--font-body); letter-spacing: 0.04em; }
-.bh-chip--wanted { background: var(--amber-bg); color: var(--amber); border: 1px dashed currentColor; }
+.bh-chip--wanted { background: var(--amber-bg); color: var(--amber); border: 1px dashed currentColor; text-decoration: none; }
+.bh-chip--wanted:hover { text-decoration: underline; }
 
 .bh-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.6rem; }
 .bh-btn {
