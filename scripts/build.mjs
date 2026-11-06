@@ -54,7 +54,7 @@ let hareRequestsCsv = "Date,Hash Name\n";
 if (rawHareRequestsCsv) {
   const bookingRows = C.parseCsv(rawHareRequestsCsv);
   const headers = Object.keys(bookingRows[0] || {});
-  const dateHeader = headers.find(h => h === "date" || h.startsWith("whendoyouwanttosettherun"));
+  const dateHeader = headers.find(h => h === "date" || h === "rundate" || h.startsWith("whendoyouwanttosettherun"));
   const nameHeader = headers.find(h => h === "hashname");
   if (!dateHeader || !nameHeader)
     throw new Error("Hare requests CSV must contain a run date and Hash Name column.");
