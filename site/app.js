@@ -124,7 +124,7 @@
 
   function noticesHtml(notices) {
     if (!notices.length) return "";
-    const until = n => n.end ? `Until ${DAYS[n.end.weekday]} ${n.end.d} ${MONTHS[n.end.m - 1]}` : "";
+    const until = n => n.end ? `Expires ${DAYS[n.end.weekday]} ${n.end.d} ${MONTHS[n.end.m - 1]}` : "";
     return `
       <section class="bh-notices" aria-labelledby="bh-notices-title">
         <h3 class="bh-notices__title" id="bh-notices-title">Announcements</h3>
@@ -194,7 +194,7 @@
     const v = run.venue;
     const addr = v ? [v.address, v.postcode].filter(Boolean).join(", ") : "";
     const links = [];
-    if (run.mapUrl) links.push(`<a class="bh-btn bh-btn--primary" href="${esc(run.mapUrl)}" target="_blank" rel="noopener">Directions</a>`);
+    if (run.mapUrl) links.push(`<a class="bh-btn bh-btn--primary" href="${esc(run.mapUrl)}" target="_blank" rel="noopener">Map...</a>`);
     if (v && safeUrl(v.website)) links.push(`<a class="bh-btn" href="${esc(v.website)}" target="_blank" rel="noopener">Pub website</a>`);
     return `
       <article class="bh-next" aria-labelledby="bh-next-title${idSuffix}">

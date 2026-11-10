@@ -237,7 +237,7 @@ main.page--about { padding-top: 2.5rem; }
 .bh-notice__text a { color: var(--green); font-weight: 700; }
 .bh-notice__meta { margin: 0; display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; align-items: baseline; font-size: 0.9rem; }
 .bh-notice__link { color: var(--green); font-weight: 700; }
-.bh-notice__until { color: var(--muted); font-variant-numeric: tabular-nums; }
+.bh-notice__until { color: var(--muted); font-size: 70%; font-variant-numeric: tabular-nums; }
 
 .bh-list__head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 0.25rem 1rem; border-bottom: 2px solid var(--ink); padding-bottom: 0.5rem; }
 .bh-list__title { margin: 0; font: 800 1.7rem/1 var(--font-display); text-transform: uppercase; letter-spacing: 0.03em; }
