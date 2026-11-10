@@ -262,6 +262,9 @@ main.page--about { padding-top: 2.5rem; }
 .bh-row__hares { justify-content: flex-end; padding-top: 1.1rem; text-align: right; }
 .bh-row.is-wanted .bh-row__date { color: var(--muted); }
 
+.bh-venue-notes { margin: 0.25rem 0 0; font-size: 0.92rem; }
+.bh-venue-notes summary { cursor: pointer; color: var(--muted); font-weight: 600; width: fit-content; }
+.bh-venue-notes p { margin: 0.25rem 0 0; color: var(--ink); }
 .bh-past summary { cursor: pointer; font-weight: 700; color: var(--muted); }
 .bh-past .bh-rows { margin-top: 0.5rem; opacity: 0.8; }
 

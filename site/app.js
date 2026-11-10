@@ -176,6 +176,19 @@
     return esc(run.venueName);
   }
 
+  function venueNotesHtml(run) {
+    // Only shown alongside run notes; when there are none, venue notes take their place (see runNotes).
+    const notes = run.notes && run.venue && run.venue.notes;
+    if (!notes) return "";
+    const flat = notes.replace(/\s+/g, " ").trim();
+    const preview = flat.length > 10 ? `${flat.slice(0, 10).trimEnd()}…` : flat;
+    return `<details class="bh-venue-notes"><summary>${esc(preview)}</summary><p>${textWithLineBreaks(notes)}</p></details>`;
+  }
+
+  function runNotes(run) {
+    return run.notes || (run.venue && run.venue.notes) || "";
+  }
+
   function nextRunHtml(run, today, eyebrow, idSuffix) {
     idSuffix = idSuffix || "";
     const v = run.venue;
@@ -198,7 +211,8 @@
           ${addr ? `<p class="bh-next__addr">${esc(addr)}</p>` : ""}
           <div class="bh-next__hares"><span class="bh-label">${run.hares.length > 1 ? "Hares" : "Hare"}</span><span class="bh-hares" data-hare-date="${run.date.key}">${haresHtml(run)}</span></div>
           ${run.announcement ? `<div class="bh-ann"><p class="bh-ann__label">Announcement</p><p class="bh-ann__text">${annText(run.announcement)}</p></div>` : ""}
-          ${run.notes ? `<p class="bh-next__notes">${textWithLineBreaks(run.notes)}</p>` : ""}
+          ${runNotes(run) ? `<p class="bh-next__notes">${textWithLineBreaks(runNotes(run))}</p>` : ""}
+          ${venueNotesHtml(run)}
           ${links.length ? `<div class="bh-actions">${links.join("")}</div>` : ""}
         </div>
       </article>`;
@@ -218,7 +232,8 @@
           <p class="bh-row__venue">${run.mapUrl ? `<a href="${esc(run.mapUrl)}" target="_blank" rel="noopener">${venueHtml(run)}</a>` : venueHtml(run)}</p>
           ${addr ? `<p class="bh-row__addr">${esc(addr)}</p>` : ""}
           ${run.announcement ? `<p class="bh-row__ann"><span class="bh-ann__label">Announcement</span> ${annText(run.announcement)}</p>` : ""}
-          ${run.notes ? `<p class="bh-row__notes">${textWithLineBreaks(run.notes)}</p>` : ""}
+          ${runNotes(run) ? `<p class="bh-row__notes">${textWithLineBreaks(runNotes(run))}</p>` : ""}
+          ${venueNotesHtml(run)}
         </div>
         <div class="bh-row__hares" data-hare-date="${run.date.key}">${haresHtml(run)}</div>
       </li>`;
