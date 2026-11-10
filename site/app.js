@@ -257,7 +257,7 @@
   }
 
   function sourceNote(source) {
-    return { live: "Live from the club sheet", saved: "Showing the last saved copy", sample: "Sample runs from the current site, with example announcements" }[source];
+    return { live: "From the current live runlist", saved: "Showing the last saved copy", sample: "Sample runs from the current site, with example announcements" }[source];
   }
 
   function renderHome(el, runs, source, notices) {
@@ -269,7 +269,7 @@
         ${first ? `
           <div class="bh-pair">
             ${nextRunHtml(first, today, "Next run", "-1")}
-            ${second ? nextRunHtml(second, today, "The week after", "-2") : ""}
+            ${second ? `<div class="bh-pair__secondary">${nextRunHtml(second, today, "The week after", "-2")}</div>` : ""}
           </div>` : `<p class="bh-empty">No runs are listed yet. Check back soon.</p>`}
         <p class="bh-more">
           <a class="bh-btn" href="${esc(cfg.harelineUrl)}">See the full hareline${later ? ` (${later} more run${later === 1 ? "" : "s"})` : ""}</a>
