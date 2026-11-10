@@ -223,6 +223,7 @@ main.page--about { padding-top: 2.5rem; }
 .bh-pair .bh-next__time { grid-column: auto; margin-top: 0; margin-left: 0.4rem; }
 .bh-pair .bh-next__body { padding: 1.25rem 1.4rem 1.4rem; }
 .bh-pair__secondary { display: grid; place-items: center; transform: scale(0.9); }
+.bh-pair__secondary .bh-next { background: color-mix(in srgb, var(--card) 85%, var(--ink)); }
 .bh-more { margin: 0; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem 1.5rem; }
 
 /* Home: front-page announcements */
