@@ -5,6 +5,7 @@ window.HARELINE_CONFIG = {
   venuesCsvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQUQovN0bTN2EiG1cDM6gTFb95AMVQYLt5eBLLkmBD0Zj9LLJJPiEWpqMzULwAr7XZ7nzw2BtKX_kvn/pub?gid=762376039&single=true&output=csv",
   announcementsCsvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQUQovN0bTN2EiG1cDM6gTFb95AMVQYLt5eBLLkmBD0Zj9LLJJPiEWpqMzULwAr7XZ7nzw2BtKX_kvn/pub?gid=733228824&single=true&output=csv",
   hareRequestsCsvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQUQovN0bTN2EiG1cDM6gTFb95AMVQYLt5eBLLkmBD0Zj9LLJJPiEWpqMzULwAr7XZ7nzw2BtKX_kvn/pub?gid=1894915969&single=true&output=csv",
+  contactFormUrl: "https://docs.google.com/forms/d/e/1FAIpQLSc3wDvvN_TTiljpIr_T5e_L-fRgxJQ35pdsBaWZX2tifLEIWw/viewform?usp=header",
   haresPackUrl: "https://barnesh3.com/HaresPack.doc",
   standingOrderUrl: "https://barnesh3.com/StandingOrder.docx",
   icsUrl: "",          // filled in by the build from SITE_URL

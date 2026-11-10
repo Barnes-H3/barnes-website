@@ -150,7 +150,7 @@ function mast(page, links, logoSrc) {
   <div class="wrap">
     <nav class="mast__nav" aria-label="Main">
       <a class="mast__brand" href="${links.home}">${emblem}<span>Barnes H3</span></a>
-      <ul class="mast__links">${navItems}</ul>
+      <ul class="mast__links">${navItems}<li><a href="${configuredUrl("contactFormUrl")}" target="_blank" rel="noopener">Contact us</a></li></ul>
     </nav>
     <h1 class="mast__title">${page.heading}</h1>
     <p class="mast__sub">${page.sub}</p>
