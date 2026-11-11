@@ -178,25 +178,6 @@ main.page--about { padding-top: 2.5rem; }
 .bh-amp { color: var(--muted); font-weight: 400; }
 .bh-tba { color: var(--muted); font-style: italic; text-transform: none; font-family: var(--font-body); font-weight: 400; font-size: 0.72em; letter-spacing: 0; }
 
-.bh-ann {
-  margin-top: 0.4rem;
-  padding: 0.8rem 1rem;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--green) 9%, var(--card));
-  border: 1px solid color-mix(in srgb, var(--green) 30%, var(--card));
-  display: grid; gap: 0.25rem;
-}
-.bh-ann__label {
-  margin: 0;
-  font: 700 0.72rem/1.2 var(--font-body);
-  letter-spacing: 0.12em; text-transform: uppercase;
-  color: var(--green);
-}
-.bh-ann__text { margin: 0; overflow-wrap: anywhere; }
-.bh-ann a, .bh-row__ann a { color: var(--green); font-weight: 700; }
-.bh-row__ann { margin: 0.4rem 0 0; font-size: 0.95rem; overflow-wrap: anywhere; }
-.bh-row__ann .bh-ann__label { margin-right: 0.35rem; }
-
 .bh-chip { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 999px; font: 700 0.8rem/1.2 var(--font-body); letter-spacing: 0.04em; }
 .bh-chip--wanted { background: var(--amber-bg); color: var(--amber); border: 1px dashed currentColor; text-decoration: none; }
 .bh-chip--wanted:hover { text-decoration: underline; }

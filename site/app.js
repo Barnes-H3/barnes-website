@@ -210,7 +210,6 @@
           <h2 class="bh-next__venue" id="bh-next-title${idSuffix}">${venueHtml(run)}</h2>
           ${addr ? `<p class="bh-next__addr">${esc(addr)}</p>` : ""}
           <div class="bh-next__hares"><span class="bh-label">${run.hares.length > 1 ? "Hares" : "Hare"}</span><span class="bh-hares" data-hare-date="${run.date.key}">${haresHtml(run)}</span></div>
-          ${run.announcement ? `<div class="bh-ann"><p class="bh-ann__label">Announcement</p><p class="bh-ann__text">${annText(run.announcement)}</p></div>` : ""}
           ${runNotes(run) ? `<p class="bh-next__notes">${textWithLineBreaks(runNotes(run))}</p>` : ""}
           ${venueNotesHtml(run)}
           ${links.length ? `<div class="bh-actions">${links.join("")}</div>` : ""}
@@ -231,7 +230,6 @@
           <p class="bh-row__meta">${run.no ? `Run ${esc(run.no)} · ` : ""}${DAYS[run.date.weekday]} ${time(run.start)}${today ? ` · ${esc(whenLabel(today, run))}` : ""}</p>
           <p class="bh-row__venue">${run.mapUrl ? `<a href="${esc(run.mapUrl)}" target="_blank" rel="noopener">${venueHtml(run)}</a>` : venueHtml(run)}</p>
           ${addr ? `<p class="bh-row__addr">${esc(addr)}</p>` : ""}
-          ${run.announcement ? `<p class="bh-row__ann"><span class="bh-ann__label">Announcement</span> ${annText(run.announcement)}</p>` : ""}
           ${runNotes(run) ? `<p class="bh-row__notes">${textWithLineBreaks(runNotes(run))}</p>` : ""}
           ${venueNotesHtml(run)}
         </div>

@@ -35,8 +35,6 @@ The site is built and deployed to GitHub Pages by GitHub Actions.
    | Hares | Hash names separated by `&` or commas. Blank or `Hare wanted` shows a "Hare wanted" badge |
    | Start | Leave blank for 19:30. Fill in only for a different start time |
    | Notes | Short practical detail shown under the venue: parking, start point |
-   | Announcements | News for that run, shown in a highlighted box: AGM, Christmas run, fancy dress, a dinner to book. Press Ctrl+Enter (Cmd+Enter on a Mac) in the cell for a new line; web addresses become links automatically. It's also added to the calendar entry |
-
 4. **Venues** columns: Venue, Address, Postcode, Website, Phone, Notes. Each pub or car park is entered once and reused.
 
 5. **Announcements** columns are for front-page notices that aren't tied to one run, such as subs being due or a dinner to book:
@@ -98,6 +96,8 @@ Rows appear in the order they're listed. To add a photo, open `site/images/organ
 **Logo:** upload the club owl as `site/images/logo.gif` (or `.png`/`.svg`). It replaces the "BH3" roundel in the header and becomes the browser-tab icon.
 
 ## Build and run locally
+
+Documents in `site/docs/` are published under `/docs/` (for example, `/docs/HaresPack.docx`); hidden files and Office lock files are excluded.
 
 ```bash
 node scripts/build.mjs                                   # uses site/data/*.csv
