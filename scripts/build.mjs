@@ -17,7 +17,6 @@ const extra = path.join(root, "dist-extra");
 const SITE_URL = (process.env.SITE_URL || "https://barnesh3.com/").replace(/\/?$/, "/");
 const BASE = new URL(SITE_URL).pathname;               // "/" or "/repo-name/"
 const ICS_URL = SITE_URL + "hareline.ics";
-const CONTACT_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSc3wDvvN_TTiljpIr_T5e_L-fRgxJQ35pdsBaWZX2tifLEIWw/viewform?usp=header";
 
 const read = f => readFile(path.join(site, f), "utf8");
 await import(pathToFileURL(path.join(site, "core.js")).href);
@@ -151,7 +150,7 @@ function mast(page, links, logoSrc) {
   <div class="wrap">
     <nav class="mast__nav" aria-label="Main">
       <a class="mast__brand" href="${links.home}">${emblem}<span>Barnes H3</span></a>
-      <ul class="mast__links">${navItems}<li><a href="${CONTACT_FORM_URL}" target="_blank" rel="noopener">Contact us</a></li></ul>
+      <ul class="mast__links">${navItems}<li><a href="${configuredUrl("contactFormUrl")}" target="_blank" rel="noopener">Contact us</a></li></ul>
     </nav>
     <h1 class="mast__title">${page.heading}</h1>
     <p class="mast__sub">${page.sub}</p>
