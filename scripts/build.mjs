@@ -3,7 +3,7 @@
 //                                   published Google Sheet CSV links (optional; falls back to site/data)
 //   SITE_URL                        public base URL, e.g. https://barnesh3.com/ or https://user.github.io/repo/
 // Outputs:
-//   dist/                            GitHub Pages site: / (home), /hareline/, /about/, hareline.ics
+//   dist/                            GitHub Pages site: / (home), /hareline/, /about/, /docs/, hareline.ics
 //   dist-extra/preview.html          self-contained preview of all three pages (hash routing, sample data)
 import { readFile, writeFile, mkdir, cp, rm } from "node:fs/promises";
 import { existsSync } from "node:fs";
@@ -185,6 +185,13 @@ for (const f of ["core.js", "app.js", "styles.css"]) await cp(path.join(site, f)
 await cp(path.join(site, "images"), path.join(dist, "images"), {
   recursive: true, filter: src => !src.endsWith("README.txt")
 });
+await cp(path.join(site, "docs"), path.join(dist, "docs"), {
+  recursive: true,
+  filter: src => {
+    const name = path.basename(src);
+    return !name.startsWith(".") && !name.startsWith("~$");
+  }
+});
 await writeFile(path.join(dist, "data/runs.csv"), runsCsv);       // saved copy, used if the sheet is unreachable
 await writeFile(path.join(dist, "data/venues.csv"), venuesCsv);
 await writeFile(path.join(dist, "data/announcements.csv"), announcementsCsv || "Order,Start,End,Announcement,URL\n");
@@ -202,6 +209,8 @@ Object.assign(window.HARELINE_CONFIG, {
   fallbackAnnouncementsUrl: ${JSON.stringify(BASE + "data/announcements.csv")},
   hareRequestsCsv: ${JSON.stringify(hareRequestsCsv)},
   hareRequestsCsvUrl: ${JSON.stringify(liveHareRequestsUrl || BASE + "data/hare-requests.csv")},
+  haresPackUrl: ${JSON.stringify(BASE + "docs/HaresPack.docx")},
+  standingOrderUrl: ${JSON.stringify(BASE + "docs/StandingOrder.docx")},
   harelineUrl: ${JSON.stringify(BASE + "hareline/")}
 });
 `);

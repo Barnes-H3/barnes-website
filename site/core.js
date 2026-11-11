@@ -99,7 +99,7 @@
   }
 
   /*
-   * runRows:   objects from the Runs tab   (run, date, venue, hares, start, notes, announcements)
+   * runRows:   objects from the Runs tab   (run, date, venue, hares, start, notes)
    * venueRows: objects from the Venues tab (venue, address, postcode, website, phone)
    */
   function buildRuns(runRows, venueRows, opts) {
@@ -138,8 +138,6 @@
         hares,
         hareWanted: hares.length === 0,
         notes: r.notes || "",
-        // Free text from the Announcements column; may contain line breaks and links.
-        announcement: (r.announcements || r.announcement || "").replace(/\r\n?/g, "\n").trim(),
         mapUrl: venueTba ? "" : mapUrl(venue, rawVenue)
       });
     });
@@ -206,7 +204,6 @@
       const title = `Barnes H3${r.no ? " run " + r.no : ""}` + (r.venueName ? ` – ${r.venueName}` : " – venue TBA");
       const desc = [
         r.hares.length ? "Hares: " + r.hares.join(" & ") : "Hare wanted!",
-        r.announcement,
         r.notes,
         r.mapUrl ? "Map: " + r.mapUrl : "",
         opts.siteUrl ? "Hareline: " + opts.siteUrl : ""

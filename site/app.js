@@ -31,6 +31,10 @@
   const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const textWithLineBreaks = s => esc(s).replace(/\r\n?|\n/g, "<br>");
   const safeUrl = u => /^https?:\/\//i.test(u || "") ? u : "";
+  const safeHref = u => {
+    try { return /^https?:$/.test(new URL(u, window.location.href).protocol) ? u : ""; }
+    catch { return ""; }
+  };
   // Escape, turn web addresses into links and keep the line breaks typed in the sheet.
   const annText = s => esc(s)
     .replace(/\bhttps?:\/\/[^\s<]+[^\s<.,;:!?)\]'"]/g, u => `<a href="${u}" target="_blank" rel="noopener">${u.replace(/^https?:\/\/(www\.)?/, "")}</a>`)
@@ -210,7 +214,6 @@
           <h2 class="bh-next__venue" id="bh-next-title${idSuffix}">${venueHtml(run)}</h2>
           ${addr ? `<p class="bh-next__addr">${esc(addr)}</p>` : ""}
           <div class="bh-next__hares"><span class="bh-label">${run.hares.length > 1 ? "Hares" : "Hare"}</span><span class="bh-hares" data-hare-date="${run.date.key}">${haresHtml(run)}</span></div>
-          ${run.announcement ? `<div class="bh-ann"><p class="bh-ann__label">Announcement</p><p class="bh-ann__text">${annText(run.announcement)}</p></div>` : ""}
           ${runNotes(run) ? `<p class="bh-next__notes">${textWithLineBreaks(runNotes(run))}</p>` : ""}
           ${venueNotesHtml(run)}
           ${links.length ? `<div class="bh-actions">${links.join("")}</div>` : ""}
@@ -231,7 +234,6 @@
           <p class="bh-row__meta">${run.no ? `Run ${esc(run.no)} · ` : ""}${DAYS[run.date.weekday]} ${time(run.start)}${today ? ` · ${esc(whenLabel(today, run))}` : ""}</p>
           <p class="bh-row__venue">${run.mapUrl ? `<a href="${esc(run.mapUrl)}" target="_blank" rel="noopener">${venueHtml(run)}</a>` : venueHtml(run)}</p>
           ${addr ? `<p class="bh-row__addr">${esc(addr)}</p>` : ""}
-          ${run.announcement ? `<p class="bh-row__ann"><span class="bh-ann__label">Announcement</span> ${annText(run.announcement)}</p>` : ""}
           ${runNotes(run) ? `<p class="bh-row__notes">${textWithLineBreaks(runNotes(run))}</p>` : ""}
           ${venueNotesHtml(run)}
         </div>
@@ -319,7 +321,7 @@
     document.querySelectorAll("[data-hareline-config-href]").forEach(el => {
       const key = el.getAttribute("data-hareline-config-href");
       const url = cfg[key];
-      if (safeUrl(url)) el.setAttribute("href", url);
+      if (safeHref(url)) el.setAttribute("href", url);
       else {
         console.error(`Missing or invalid HARELINE_CONFIG.${key}`);
         el.removeAttribute("href");
