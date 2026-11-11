@@ -31,6 +31,10 @@
   const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const textWithLineBreaks = s => esc(s).replace(/\r\n?|\n/g, "<br>");
   const safeUrl = u => /^https?:\/\//i.test(u || "") ? u : "";
+  const safeHref = u => {
+    try { return /^https?:$/.test(new URL(u, window.location.href).protocol) ? u : ""; }
+    catch { return ""; }
+  };
   // Escape, turn web addresses into links and keep the line breaks typed in the sheet.
   const annText = s => esc(s)
     .replace(/\bhttps?:\/\/[^\s<]+[^\s<.,;:!?)\]'"]/g, u => `<a href="${u}" target="_blank" rel="noopener">${u.replace(/^https?:\/\/(www\.)?/, "")}</a>`)
@@ -317,7 +321,7 @@
     document.querySelectorAll("[data-hareline-config-href]").forEach(el => {
       const key = el.getAttribute("data-hareline-config-href");
       const url = cfg[key];
-      if (safeUrl(url)) el.setAttribute("href", url);
+      if (safeHref(url)) el.setAttribute("href", url);
       else {
         console.error(`Missing or invalid HARELINE_CONFIG.${key}`);
         el.removeAttribute("href");
