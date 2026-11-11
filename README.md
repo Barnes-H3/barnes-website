@@ -25,7 +25,7 @@ The site is built and deployed to GitHub Pages by GitHub Actions.
 ## 1. Set up the Google Sheet (one-off)
 
 1. Create a Google Sheet with tabs named **Runs**, **Venues**, **Announcements**, **Run Stats** and **Website Settings**.
-2. Import `sheet-template/Runs.csv`, `Venues.csv` and `Announcements.csv` into them (File → Import → Replace current sheet). The **Run Stats** tab must have `Name`, `Grand Total` and `Year to Date` columns; publish it as CSV and set its URL as `runStatsCsvUrl` in `site/config.js`. Publish the **Website Settings** tab as CSV and set its URL as `websiteSettingsCsvUrl`; the page reads the `Run stats date` setting from its `Name` and `Value` columns.
+2. Import `sheet-template/Runs.csv`, `Venues.csv` and `Announcements.csv` into them (File → Import → Replace current sheet). The **Run Stats** tab must have `Name`, `Grand Total` and `Year to Date` columns; publish it as CSV and set its URL as `runStatsCsvUrl` in `site/config.js`. Publish the **Website Settings** tab as CSV and set its URL as `websiteSettingsCsvUrl`; the page reads the `Run stats date` setting, and `OH:` rows with URLs appear in the header's **Hash Links** menu.
 3. **Runs** columns:
 
    | Column | What to put in it |

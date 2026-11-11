@@ -56,7 +56,7 @@ a { color: var(--green); }
   padding-right: max(16px, env(safe-area-inset-right, 0px));
 }
 
-.mast { background: var(--band); color: var(--green-ink); position: relative; overflow: hidden; }
+.mast { background: var(--band); color: var(--green-ink); position: relative; }
 .mast .wrap { padding-block: 1.25rem 2.25rem; position: relative; }
 .mast__nav { display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; align-items: baseline; justify-content: space-between; }
 .mast__brand { display: inline-flex; align-items: center; gap: 0.6rem; font: 800 1.35rem/1 var(--font-display); letter-spacing: 0.04em; text-transform: uppercase; color: inherit; text-decoration: none; }
@@ -69,6 +69,20 @@ a { color: var(--green); }
 .mast__links { display: flex; gap: 1.1rem; list-style: none; margin: 0; padding: 0; }
 .mast__links a { color: inherit; text-decoration: none; opacity: 0.85; font-weight: 700; font-size: 0.95rem; }
 .mast__links a:hover, .mast__links a[aria-current="page"] { opacity: 1; text-decoration: underline; text-underline-offset: 4px; }
+.mast__dropdown { position: relative; }
+.mast__dropdown summary { cursor: pointer; list-style: none; color: inherit; opacity: 0.85; font-weight: 700; font-size: 0.95rem; }
+.mast__dropdown summary::-webkit-details-marker { display: none; }
+.mast__dropdown summary::after { content: " ▾"; font-size: 0.8em; }
+.mast__dropdown summary:hover, .mast__dropdown details[open] summary { opacity: 1; text-decoration: underline; text-underline-offset: 4px; }
+.mast__dropdown-menu {
+  display: none; position: absolute; z-index: 20; top: calc(100% + 0.65rem); right: 0;
+  min-width: 11rem; margin: 0; padding: 0.4rem; list-style: none;
+  border: 1px solid color-mix(in srgb, var(--chalk) 35%, var(--band));
+  border-radius: 8px; background: var(--band-soft); box-shadow: 0 8px 20px -10px rgba(0, 0, 0, 0.7);
+}
+.mast__dropdown details[open] .mast__dropdown-menu { display: grid; }
+.mast__dropdown-menu a { display: block; padding: 0.45rem 0.6rem; white-space: nowrap; }
+.mast__dropdown-menu a:hover { background: color-mix(in srgb, var(--chalk) 12%, transparent); }
 .mast__title {
   margin: 2rem 0 0.4rem;
   font: 800 clamp(1.76rem, 8vw, 4.48rem)/0.98 var(--font-display);
