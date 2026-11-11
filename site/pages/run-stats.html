@@ -1,0 +1,19 @@
+<section class="run-stats" aria-label="Run statistics">
+  <div class="run-stats__toolbar">
+    <label for="run-stats-search">Search by name</label>
+    <input id="run-stats-search" type="search" autocomplete="off" placeholder="Enter a hash name">
+  </div>
+  <p class="run-stats__status" id="run-stats-status" role="status" aria-live="polite">Loading run statistics…</p>
+  <div class="run-stats__table-wrap">
+    <table class="run-stats__table">
+      <thead>
+        <tr>
+          <th scope="col" aria-sort="ascending"><button type="button" data-sort="name">Name</button></th>
+          <th scope="col" aria-sort="none"><button type="button" data-sort="grandtotal">Grand Total</button></th>
+          <th scope="col" aria-sort="none"><button type="button" data-sort="yeartodate">Year to Date</button></th>
+        </tr>
+      </thead>
+      <tbody id="run-stats-rows"></tbody>
+    </table>
+  </div>
+</section>
