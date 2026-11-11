@@ -52,6 +52,20 @@ const venuesCsv = await csv("VENUES_CSV_URL", "venues.csv");
 const announcementsCsv = await csv("ANNOUNCEMENTS_CSV_URL", "announcements.csv", true);
 const runStatsCsv = await csv("RUN_STATS_CSV_URL", "run-stats.csv", true, configuredUrl("runStatsCsvUrl"));
 const websiteSettingsCsv = await csv("WEBSITE_SETTINGS_CSV_URL", "website-settings.csv", true, configuredUrl("websiteSettingsCsvUrl"));
+const hashLinks = C.parseCsv(websiteSettingsCsv).flatMap(row => {
+  const match = (row.name || "").trim().match(/^OH\s*:\s*(.+)$/i);
+  if (!match) return [];
+  const href = (row.value || "").trim();
+  if (!href) return [];
+  let url;
+  try { url = new URL(href); }
+  catch { console.warn(`Skipping invalid Hash Link URL for ${match[1].trim()}: ${href}`); return []; }
+  if (url.protocol !== "http:" && url.protocol !== "https:") {
+    console.warn(`Skipping non-HTTP Hash Link URL for ${match[1].trim()}: ${href}`);
+    return [];
+  }
+  return [{ label: match[1].trim(), href: url.href }];
+});
 const configuredHareRequestsUrl = process.env.HARE_REQUESTS_CSV_URL || configuredUrl("hareRequestsCsvUrl");
 const rawHareRequestsCsv = await csv("HARE_REQUESTS_CSV_URL", "hare-requests.csv", true, configuredUrl("hareRequestsCsvUrl"));
 let hareRequestsCsv = "Date,Hash Name\n";
@@ -151,6 +165,13 @@ const PAGES = [
 function mast(page, links, logoSrc) {
   const navItems = PAGES.map(p =>
     `<li><a href="${links[p.key]}"${p.key === page.key ? ' aria-current="page"' : ""}>${p.nav}</a></li>`).join("");
+  const hashLinksMenu = hashLinks.length ? `
+      <li class="mast__dropdown">
+        <details>
+          <summary>Hash Links</summary>
+          <ul class="mast__dropdown-menu">${hashLinks.map(link => `<li><a href="${esc(link.href)}" target="_blank" rel="noopener">${esc(link.label)}</a></li>`).join("")}</ul>
+        </details>
+      </li>` : "";
   const emblem = logoSrc
     ? `<img class="mast__logo" src="${logoSrc}" alt="">`
     : `<span class="mast__logo mast__logo--roundel" aria-hidden="true">BH3</span>`;
@@ -159,7 +180,7 @@ function mast(page, links, logoSrc) {
   <div class="wrap">
     <nav class="mast__nav" aria-label="Main">
       <a class="mast__brand" href="${links.home}">${emblem}<span>Barnes H3</span></a>
-      <ul class="mast__links">${navItems}<li><a href="${CONTACT_FORM_URL}" target="_blank" rel="noopener">Contact us</a></li></ul>
+      <ul class="mast__links">${navItems}<li><a href="${CONTACT_FORM_URL}" target="_blank" rel="noopener">Contact us</a></li>${hashLinksMenu}</ul>
     </nav>
     <h1 class="mast__title">${page.heading}</h1>
     <p class="mast__sub">${page.sub}</p>
