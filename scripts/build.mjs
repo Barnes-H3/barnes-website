@@ -3,8 +3,8 @@
 //                                   published Google Sheet CSV links (optional; falls back to site/data)
 //   SITE_URL                        public base URL, e.g. https://barnesh3.com/ or https://user.github.io/repo/
 // Outputs:
-//   dist/                            GitHub Pages site: / (home), /hareline/, /about/, /docs/, hareline.ics
-//   dist-extra/preview.html          self-contained preview of all three pages (hash routing, sample data)
+//   dist/                            GitHub Pages site: / (home), /hareline/, /about/, /run-stats/, /docs/, hareline.ics
+//   dist-extra/preview.html          self-contained preview of all pages (hash routing, sample data)
 import { readFile, writeFile, mkdir, cp, rm } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -50,6 +50,8 @@ async function csv(envVar, file, optional, configuredCsvUrl = "") {
 const runsCsv = await csv("RUNS_CSV_URL", "runs.csv");
 const venuesCsv = await csv("VENUES_CSV_URL", "venues.csv");
 const announcementsCsv = await csv("ANNOUNCEMENTS_CSV_URL", "announcements.csv", true);
+const runStatsCsv = await csv("RUN_STATS_CSV_URL", "run-stats.csv", true, configuredUrl("runStatsCsvUrl"));
+const websiteSettingsCsv = await csv("WEBSITE_SETTINGS_CSV_URL", "website-settings.csv", true, configuredUrl("websiteSettingsCsvUrl"));
 const configuredHareRequestsUrl = process.env.HARE_REQUESTS_CSV_URL || configuredUrl("hareRequestsCsvUrl");
 const rawHareRequestsCsv = await csv("HARE_REQUESTS_CSV_URL", "hare-requests.csv", true, configuredUrl("hareRequestsCsvUrl"));
 let hareRequestsCsv = "Date,Hash Name\n";
@@ -73,9 +75,9 @@ const runs = C.buildRuns(C.parseCsv(runsCsv), C.parseCsv(venuesCsv));
 if (!runs.length) throw new Error("No valid runs found. Is the Date column filled in?");
 
 const organisers = C.parseCsv(await read("content/organisers.csv")).filter(o => o.name || o.role);
-const [core, app, css] = await Promise.all(["core.js", "app.js", "styles.css"].map(read));
+const [core, app, runStatsApp, css] = await Promise.all(["core.js", "app.js", "run-stats.js", "styles.css"].map(read));
 const pageHtml = Object.fromEntries(await Promise.all(
-  ["home", "hareline", "about"].map(async p => [p, await read(`pages/${p}.html`)])
+  ["home", "hareline", "about", "run-stats"].map(async p => [p, await read(`pages/${p}.html`)])
 ));
 
 // ---------- images ----------
@@ -136,6 +138,12 @@ const PAGES = [
     heading: "About<br>the club",
     sub: "Who we are and who to ask.",
     description: "About Barnes Hash House Harriers and the people who run the club."
+  },
+  {
+    key: "run-stats", out: "run-stats/index.html", title: "Run Stats · Barnes H3", nav: "Run Stats",
+    heading: "Run stats",
+    sub: "See who has run the most with Barnes H3.",
+    description: "Barnes H3 run statistics by hasher, including grand total and year to date."
   }
 ];
 
@@ -169,7 +177,7 @@ const footer = links => `
 <footer class="foot">
   <div class="wrap">
     <p class="foot__motto">Rain or shine, the trail is on!</p>
-    <nav aria-label="Footer"><a href="${links.home}">Home</a> · <a href="${links.hareline}">Hareline</a> · <a href="${links.about}">About</a></nav>
+    <nav aria-label="Footer"><a href="${links.home}">Home</a> · <a href="${links.hareline}">Hareline</a> · <a href="${links.about}">About</a> · <a href="${links["run-stats"]}">Run Stats</a></nav>
   </div>
 </footer>`;
 
@@ -182,7 +190,7 @@ async function main(page, mode) {
 // ---------- dist/: the deployable site ----------
 await rm(dist, { recursive: true, force: true });
 await mkdir(path.join(dist, "data"), { recursive: true });
-for (const f of ["core.js", "app.js", "styles.css"]) await cp(path.join(site, f), path.join(dist, f));
+for (const f of ["core.js", "app.js", "run-stats.js", "styles.css"]) await cp(path.join(site, f), path.join(dist, f));
 await cp(path.join(site, "images"), path.join(dist, "images"), {
   recursive: true, filter: src => !src.endsWith("README.txt")
 });
@@ -197,6 +205,8 @@ await writeFile(path.join(dist, "data/runs.csv"), runsCsv);       // saved copy,
 await writeFile(path.join(dist, "data/venues.csv"), venuesCsv);
 await writeFile(path.join(dist, "data/announcements.csv"), announcementsCsv || "Order,Start,End,Announcement,URL\n");
 await writeFile(path.join(dist, "data/hare-requests.csv"), hareRequestsCsv);
+await writeFile(path.join(dist, "data/run-stats.csv"), runStatsCsv || "Name,Grand Total,Year to Date\n");
+await writeFile(path.join(dist, "data/website-settings.csv"), websiteSettingsCsv || "Name,Value\n");
 await writeFile(path.join(dist, "hareline.ics"), C.toIcs(runs, { siteUrl: SITE_URL + "hareline/" }));
 
 // config.js: the editors' sheet links, plus the paths this build knows about
@@ -210,18 +220,28 @@ Object.assign(window.HARELINE_CONFIG, {
   fallbackAnnouncementsUrl: ${JSON.stringify(BASE + "data/announcements.csv")},
   hareRequestsCsv: ${JSON.stringify(hareRequestsCsv)},
   hareRequestsCsvUrl: ${JSON.stringify(liveHareRequestsUrl || BASE + "data/hare-requests.csv")},
+  fallbackRunStatsUrl: ${JSON.stringify(BASE + "data/run-stats.csv")},
+  fallbackWebsiteSettingsUrl: ${JSON.stringify(BASE + "data/website-settings.csv")},
   haresPackUrl: ${JSON.stringify(BASE + "docs/HaresPack.docx")},
   standingOrderUrl: ${JSON.stringify(BASE + "docs/StandingOrder.docx")},
   harelineUrl: ${JSON.stringify(BASE + "hareline/")}
 });
 `);
 
-const siteLinks = { home: BASE, hareline: BASE + "hareline/", about: BASE + "about/" };
+const siteLinks = { home: BASE, hareline: BASE + "hareline/", about: BASE + "about/", "run-stats": BASE + "run-stats/" };
 const siteLogo = logoFile ? BASE + "images/" + logoFile : null;
 for (const page of PAGES) {
-  const hasRuns = page.key !== "about";
   const out = path.join(dist, page.out);
   await mkdir(path.dirname(out), { recursive: true });
+  const scripts = page.key === "run-stats"
+    ? `<script src="${BASE}config.js"></script>
+<script src="${BASE}core.js"></script>
+<script src="${BASE}run-stats.js"></script>`
+    : page.key !== "about"
+      ? `<script src="${BASE}config.js"></script>
+<script src="${BASE}core.js"></script>
+<script src="${BASE}app.js"></script>`
+      : "";
   await writeFile(out, `<!doctype html>
 <html lang="en-GB">
 <head>
@@ -240,9 +260,7 @@ ${fonts}
 ${mast(page, siteLinks, siteLogo)}
 ${await main(page, "site")}
 ${footer(siteLinks)}
-${hasRuns ? `<script src="${BASE}config.js"></script>
-<script src="${BASE}core.js"></script>
-<script src="${BASE}app.js"></script>` : ""}
+${scripts}
 </body>
 </html>
 `);
@@ -266,7 +284,7 @@ ${footer(siteLinks)}
 
 // ---------- preview.html: all three pages in one file, switched by #home / #hareline / #about ----------
 await mkdir(extra, { recursive: true });
-const pvLinks = { home: "#home", hareline: "#hareline", about: "#about" };
+const pvLinks = { home: "#home", hareline: "#hareline", about: "#about", "run-stats": "#run-stats" };
 const pvLogo = logoFile ? await imageSrc(logoFile, "preview") : null;
 const pvSections = await Promise.all(PAGES.map(async p =>
   `<div class="pv-page" data-page="${p.key}"${p.key === "home" ? "" : " hidden"}>${mast(p, pvLinks, pvLogo)}${await main(p, "preview")}</div>`));
@@ -283,6 +301,10 @@ window.HARELINE_CONFIG = {
   icsUrl: ${JSON.stringify(ICS_URL)},
   harelineUrl: "#hareline",
   hareRequestsCsv: ${JSON.stringify(hareRequestsCsv)},
+  fallbackRunStatsUrl: "",
+  inlineRunStats: ${JSON.stringify(runStatsCsv)},
+  fallbackWebsiteSettingsUrl: "",
+  inlineWebsiteSettings: ${JSON.stringify(websiteSettingsCsv)},
   inline: { runs: ${JSON.stringify(runsCsv)}, venues: ${JSON.stringify(venuesCsv)}, announcements: ${JSON.stringify(announcementsCsv)} }
 };
 (function () {
@@ -298,7 +320,8 @@ window.HARELINE_CONFIG = {
 })();
 ${core}
 ${app}
+${runStatsApp}
 </script>
 `);
 
-console.log(`Built ${runs.length} runs, ${organisers.length} organisers → dist/ (home, hareline, about, hareline.ics), dist-extra/preview.html`);
+console.log(`Built ${runs.length} runs, ${organisers.length} organisers → dist/ (home, hareline, about, run stats, hareline.ics), dist-extra/preview.html`);

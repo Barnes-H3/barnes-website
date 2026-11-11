@@ -88,6 +88,26 @@ main.wrap { padding-block: 0 3rem; }
 .page > [data-hareline]:first-child .bh > :first-child { margin-top: -1.25rem; }
 .page-note { margin: 2rem 0 0; color: var(--muted); max-width: 44rem; }
 
+/* Run statistics */
+.run-stats { display: grid; gap: 1rem; }
+.run-stats__toolbar { display: grid; gap: 0.35rem; max-width: 24rem; }
+.run-stats__toolbar label { font-weight: 700; }
+.run-stats__toolbar input { width: 100%; min-height: 2.75rem; padding: 0.55rem 0.75rem; border: 1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--ink); font: inherit; }
+.run-stats__status { margin: 0; color: var(--muted); }
+.run-stats__table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r); background: var(--card); }
+.run-stats__table { width: 100%; border-collapse: collapse; text-align: left; }
+.run-stats__table th, .run-stats__table td { padding: 0.7rem 1rem; border-bottom: 1px solid var(--line); }
+.run-stats__table thead { background: var(--band); color: var(--green-ink); }
+.run-stats__table thead th { white-space: nowrap; }
+.run-stats__table thead button { padding: 0; border: 0; background: none; color: inherit; font: inherit; font-weight: 700; cursor: pointer; }
+.run-stats__table thead th[aria-sort="ascending"] button::after { content: " ↑"; }
+.run-stats__table thead th[aria-sort="descending"] button::after { content: " ↓"; }
+.run-stats__table tbody th { font-weight: 700; }
+.run-stats__table tbody td { font-variant-numeric: tabular-nums; text-align: right; }
+.run-stats__table thead th:not(:first-child) { text-align: right; }
+.run-stats__table tbody tr:last-child > * { border-bottom: 0; }
+.run-stats__table tbody tr:hover { background: color-mix(in srgb, var(--green) 6%, var(--card)); }
+
 /* About page */
 main.page--about { padding-top: 2.5rem; }
 .about { display: grid; gap: 3rem; }

@@ -1,19 +1,20 @@
 # Barnes H3 website
 
-A three-page static club site whose run list the hareraiser updates from a Google Sheet.
+A static club site whose run list and stats the hareraiser updates from a Google Sheet.
 
 | Page | URL | What's on it | Who changes it, and how often |
 |---|---|---|---|
 | Home | `/` | Club intro, the **next two runs**, current **announcements**, first-timer and hash cash info | Runs: the sheet, weekly. Text: `site/pages/home.html`, rarely |
 | Hareline | `/hareline/` | Every upcoming run, recent runs, calendar subscription | The sheet, weekly |
 | About | `/about/` | Club story and **who runs the club**, with photos | `site/pages/about.html` and `site/content/organisers.csv`, a few times a year |
+| Run Stats | `/run-stats/` | Run stats date plus searchable stats, sortable by name, grand total and year to date | The Run Stats and Website Settings tabs in the sheet |
 
-The run pages read the sheet directly, so a change shows up within a few minutes of being typed.
+The run pages and Run Stats page read their published sheets directly, so a change shows up within a few minutes of being typed.
 
 ```
-Google Sheet (Runs + Venues + Announcements tabs)
+Google Sheet (Runs + Venues + Announcements + Run Stats + Website Settings tabs)
         │  published as CSV
-        ├──► Home + Hareline pages (read it live in the browser; fall back to a saved copy)
+        ├──► Home + Hareline + Run Stats pages (read live in the browser; fall back to saved copies)
         └──► Nightly build (GitHub Actions) ──► hareline.ics calendar feed + saved copy ──► GitHub Pages
 ```
 
@@ -23,8 +24,8 @@ The site is built and deployed to GitHub Pages by GitHub Actions.
 
 ## 1. Set up the Google Sheet (one-off)
 
-1. Create a Google Sheet with three tabs named **Runs**, **Venues** and **Announcements**.
-2. Import `sheet-template/Runs.csv`, `Venues.csv` and `Announcements.csv` into them (File → Import → Replace current sheet).
+1. Create a Google Sheet with tabs named **Runs**, **Venues**, **Announcements**, **Run Stats** and **Website Settings**.
+2. Import `sheet-template/Runs.csv`, `Venues.csv` and `Announcements.csv` into them (File → Import → Replace current sheet). The **Run Stats** tab must have `Name`, `Grand Total` and `Year to Date` columns; publish it as CSV and set its URL as `runStatsCsvUrl` in `site/config.js`. Publish the **Website Settings** tab as CSV and set its URL as `websiteSettingsCsvUrl`; the page reads the `Run stats date` setting from its `Name` and `Value` columns.
 3. **Runs** columns:
 
    | Column | What to put in it |
