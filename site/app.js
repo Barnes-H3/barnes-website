@@ -181,8 +181,7 @@
   }
 
   function venueNotesHtml(run) {
-    // Only shown alongside run notes; when there are none, venue notes take their place (see runNotes).
-    const notes = run.notes && run.venue && run.venue.notes;
+    const notes = run.venue && run.venue.notes;
     if (!notes) return "";
     const flat = notes.replace(/\s+/g, " ").trim();
     const preview = flat.length > 10 ? `${flat.slice(0, 10).trimEnd()}…` : flat;
@@ -214,7 +213,7 @@
           <h2 class="bh-next__venue" id="bh-next-title${idSuffix}">${venueHtml(run)}</h2>
           ${addr ? `<p class="bh-next__addr">${esc(addr)}</p>` : ""}
           <div class="bh-next__hares"><span class="bh-label">${run.hares.length > 1 ? "Hares" : "Hare"}</span><span class="bh-hares" data-hare-date="${run.date.key}">${haresHtml(run)}</span></div>
-          ${runNotes(run) ? `<p class="bh-next__notes">${textWithLineBreaks(runNotes(run))}</p>` : ""}
+          ${run.notes ? `<p class="bh-next__notes">${textWithLineBreaks(run.notes)}</p>` : ""}
           ${venueNotesHtml(run)}
           ${links.length ? `<div class="bh-actions">${links.join("")}</div>` : ""}
         </div>
