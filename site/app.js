@@ -220,9 +220,11 @@
       </article>`;
   }
 
-  function rowHtml(run, today) {
+  function rowHtml(run, today, isPast = false) {
     const v = run.venue;
     const addr = v ? [v.address, v.postcode].filter(Boolean).join(", ") : "";
+    const notes = isPast ? run.notes : runNotes(run);
+    const venueNotes = isPast || run.notes ? venueNotesHtml(run) : "";
     return `
       <li class="bh-row${run.hareWanted ? " is-wanted" : ""}">
         <div class="bh-row__date" aria-label="${DAYS[run.date.weekday]} ${run.date.d} ${MONTHS[run.date.m - 1]} ${run.date.y}">
@@ -233,8 +235,8 @@
           <p class="bh-row__meta">${run.no ? `Run ${esc(run.no)} · ` : ""}${DAYS[run.date.weekday]} ${time(run.start)}${today ? ` · ${esc(whenLabel(today, run))}` : ""}</p>
           <p class="bh-row__venue">${run.mapUrl ? `<a href="${esc(run.mapUrl)}" target="_blank" rel="noopener">${venueHtml(run)}</a>` : venueHtml(run)}</p>
           ${addr ? `<p class="bh-row__addr">${esc(addr)}</p>` : ""}
-          ${runNotes(run) ? `<p class="bh-row__notes">${textWithLineBreaks(runNotes(run))}</p>` : ""}
-          ${venueNotesHtml(run)}
+          ${notes ? `<p class="bh-row__notes">${textWithLineBreaks(notes)}</p>` : ""}
+          ${venueNotes}
         </div>
         <div class="bh-row__hares" data-hare-date="${run.date.key}">${haresHtml(run)}</div>
       </li>`;
@@ -297,7 +299,7 @@
         ${past.length ? `
           <details class="bh-past">
             <summary>Recent runs (${Math.min(past.length, 12)})</summary>
-            <ol class="bh-rows">${past.slice(0, 12).map(r => rowHtml(r, null)).join("")}</ol>
+            <ol class="bh-rows">${past.slice(0, 12).map(r => rowHtml(r, null, true)).join("")}</ol>
           </details>` : ""}
         ${calendarHtml()}
         <p class="bh-source">${esc(sourceNote(source))}</p>
