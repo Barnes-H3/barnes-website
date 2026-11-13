@@ -66,7 +66,7 @@ Past runs drop off the hareline automatically, and the page shows up to 12 recen
 4. Put the three CSV links and the Provisional Bookings CSV link (`hareRequestsCsvUrl`) into `site/config.js`. The build refreshes and sanitizes provisional bookings when it runs.
 5. Push to `main`, or use Actions → **Build and deploy hareline** → Run workflow.
 
-The workflow deploys on every push to `main`, nightly, and on demand. The nightly run refreshes `hareline.ics` and the saved copy. Nothing needs secrets: the only inputs are the public sheet links.
+The workflow deploys on every push to `main`, nightly, and on demand. After deployment, it smoke-tests the live pages, scripts, data feeds, calendar and documents. The nightly run refreshes `hareline.ics` and the saved copy. Nothing needs secrets: the only inputs are the public sheet links.
 
 **Moving the domain:**
 
