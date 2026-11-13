@@ -281,6 +281,8 @@ main.page--about { padding-top: 2.5rem; }
 
 .bh-venue-notes { margin: 0.25rem 0 0; font-size: 0.92rem; }
 .bh-venue-notes summary { cursor: pointer; color: var(--muted); font-weight: 600; width: fit-content; }
+.bh-venue-notes[open] > summary { font-size: 0; }
+.bh-venue-notes[open] > summary::marker { font-size: 0.92rem; }
 .bh-venue-notes p { margin: 0.25rem 0 0; color: var(--ink); }
 .bh-past summary { cursor: pointer; font-weight: 700; color: var(--muted); }
 .bh-past .bh-rows { margin-top: 0.5rem; opacity: 0.8; }
